@@ -1,40 +1,43 @@
 #!/usr/bin/env node
-
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import figlet from 'figlet';
-import chalk from 'chalk';
 import { registerCommands } from './commands/index.js';
-import { createAliases } from './utils/aliases.js';
+import chalk from 'chalk';
+import figlet from 'figlet';
 
-// 创建 ASCII 艺术字
-const title = figlet.textSync('Only One CLI', {
-  font: 'Standard',
-  horizontalLayout: 'default',
-  verticalLayout: 'default',
-  width: 80,
-  whitespaceBreak: true
-});
+// 显示欢迎信息的函数
+function showWelcome() {
+  console.log(
+    chalk.cyan(
+      figlet.textSync('Only One CLI', {
+        font: 'Standard',
+        horizontalLayout: 'default',
+        verticalLayout: 'default'
+      })
+    )
+  );
+  console.log(chalk.yellow('Your command line companion\n'));
+}
 
-// 输出带颜色的标题
-console.log(chalk.cyan(title));
-console.log(chalk.gray('Your command line companion\n'));
+// 检查是否需要显示欢迎信息
+const args = hideBin(process.argv);
+const shouldShowWelcome = args.length === 0 || // 没有参数时
+                         args[0] === 'help' || // 显示帮助时
+                         args[0] === '--help' || // 显示帮助时
+                         args[0] === '-h'; // 显示帮助时
 
-// 创建基础命令
-const baseCommand = yargs(hideBin(process.argv))
+if (shouldShowWelcome) {
+  showWelcome();
+}
+
+// 配置 yargs
+const cli = yargs(hideBin(process.argv))
   .scriptName('one')
-  .usage('$0 [cmd] [args]')
-  .wrap(null)
-  .strict()
+  .usage('$0 <command> [options]')
+  .version()
+  .alias('v', 'version')
   .help()
-  .alias('h', 'help')
-  .alias('v', 'version');
+  .alias('h', 'help');
 
 // 注册所有命令
-registerCommands(baseCommand);
-
-// 创建命令的别名
-const argv = baseCommand.parse();
-
-// 创建软链接别名
-createAliases(process.argv[1]);
+registerCommands(cli).parse();
