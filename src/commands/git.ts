@@ -89,10 +89,17 @@ export async function handleGitCommit(message?: string): Promise<void> {
 
 export async function handleGitPush(message?: string): Promise<void> {
   try {
-    if (message) {
+    // 如果没有提供消息，使用 AI 生成的 commit
+    if (!message) {
+      await handleGitCommit();
+    } else {
       await handleGitCommit(message);
     }
+    
+    // 获取当前分支
     const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+    
+    console.log(chalk.cyan(`Pushing to ${currentBranch}...`));
     execSync(`git push origin ${currentBranch}`, { stdio: 'inherit' });
     console.log(chalk.green('✓ Changes pushed successfully'));
   } catch (error: any) {
