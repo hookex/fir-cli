@@ -6,8 +6,24 @@ import inquirer from 'inquirer';
 
 export async function handleGitCommit(message?: string): Promise<void> {
   try {
+    // 检查是否有暂存的更改
+    const stagedChanges = execSync('git diff --cached --name-only').toString().trim();
+    if (!stagedChanges) {
+      // 如果没有暂存的更改，自动添加所有更改
+      console.log(chalk.yellow('No staged changes found. Adding all changes...'));
+      execSync('git add .');
+    }
+
+    // 再次检查是否有可提交的更改
+    const hasChanges = execSync('git status --porcelain').toString().trim();
+    if (!hasChanges) {
+      console.log(chalk.yellow('No changes to commit'));
+      return;
+    }
+
     let commitMessage = message;
 
+    // 如果没有提供消息，使用 AI 生成
     if (!commitMessage) {
       try {
         // 生成 AI commit 信息
@@ -64,15 +80,10 @@ export async function handleGitCommit(message?: string): Promise<void> {
     }
 
     // 执行 git commit
-    execSync(`git add .`, { stdio: 'inherit' });
     execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
     console.log(chalk.green('✓ Changes committed successfully'));
   } catch (error: any) {
-    if (error.message.includes('nothing to commit')) {
-      console.error(chalk.yellow('No changes to commit. Stage your changes first using git add'));
-    } else {
-      console.error(chalk.red('Git commit failed:'), error.message);
-    }
+    console.error(chalk.red('Git commit failed:'), error.message);
   }
 }
 

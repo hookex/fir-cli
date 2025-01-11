@@ -107,12 +107,12 @@ const commands: Array<CommandModule<{}, any>> = [
     }
   },
   {
-    command: 'commit <message>',
-    describe: 'Commit changes with a message',
+    command: 'commit [message]',
+    describe: 'Commit changes with a message (uses AI if message is empty)',
     builder: (yargs: Argv) => {
       return yargs.positional('message', {
         type: 'string',
-        describe: 'Commit message'
+        describe: 'Commit message (optional, will use AI if not provided)'
       });
     },
     handler: async (argv: any) => {
@@ -171,7 +171,8 @@ export function registerCommands(yargs: Argv): Argv {
     .example('$0 chrome https://github.com', 'Open Chrome with specific URL')
     .example('$0 nrm', 'Install and run nrm if not found')
     .example('$0 nrm ls', 'Run nrm with arguments')
-    .example('$0 commit "fix: update readme"', 'Commit changes with a message')
+    .example('$0 commit', 'Commit changes with AI-generated message')
+    .example('$0 commit "feat: update readme"', 'Commit with specific message')
     .example('$0 g push', 'Push changes using last commit message (alias for git)')
     .example('$0 git push "feat: new feature"', 'Push changes with a new message')
     .example('$0 g open', 'Open repository in browser (alias for git open)')
