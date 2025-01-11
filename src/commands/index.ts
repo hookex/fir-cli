@@ -3,6 +3,7 @@ import { handleGitOpen, handleGitPush, handleGitCommit } from './git.js';
 import { getLocalIPs } from './ip.js';
 import { openInVSCode } from './vscode.js';
 import { showTime } from './time.js';
+import { installAndRunGlobalPackage } from './npm.js';
 
 interface GitArgs {
   action: 'push' | 'open';
@@ -15,6 +16,29 @@ interface CommitArgs {
 
 // 定义命令配置
 const commands: Array<CommandModule<{}, any>> = [
+  {
+    command: '$0 <command> [args..]',
+    describe: 'Run or install and run a global npm package',
+    builder: (yargs: Argv) => {
+      return yargs
+        .positional('command', {
+          type: 'string',
+          describe: 'Command to run'
+        })
+        .positional('args', {
+          type: 'string',
+          describe: 'Command arguments',
+          array: true
+        });
+    },
+    handler: async (argv: any) => {
+      try {
+        await installAndRunGlobalPackage(argv.command, argv.args || []);
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
+  },
   {
     command: '$0 <message>',
     describe: 'Commit changes with a message',
@@ -110,6 +134,8 @@ export function registerCommands(yargs: Argv): Argv {
 
   // 添加示例
   return yargsInstance
+    .example('$0 nrm', 'Install and run nrm if not found')
+    .example('$0 nrm ls', 'Run nrm with arguments')
     .example('$0 "fix: update readme"', 'Commit changes with a message')
     .example('$0 g push', 'Push changes using last commit message (alias for git)')
     .example('$0 git push "feat: new feature"', 'Push changes with a new message')
@@ -117,7 +143,5 @@ export function registerCommands(yargs: Argv): Argv {
     .example('$0 i', 'Show local IP addresses (alias for ip)')
     .example('$0 t', 'Show current time (alias for time)')
     .example('$0 c', 'Open in VS Code (alias for code)')
-    .example('$0 o', 'Open in VS Code (another alias for code)')
-    .example('a "fix: update"', 'Short alias for one')
-    .example('o "fix: update"', 'Another alias for one');
+    .example('$0 o', 'Open in VS Code (another alias for code)');
 }
