@@ -77,9 +77,9 @@ const baseCommand = yargs(hideBin(process.argv))
   )
   .command('ip', 'Show local IP addresses',
     () => {},
-    () => {
+    async () => {
       try {
-        getLocalIPs();
+        await getLocalIPs();
       } catch (error: any) {
         console.error("Error:", error.message);
       }
