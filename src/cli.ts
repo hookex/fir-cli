@@ -3,6 +3,8 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import open from 'open';
+import figlet from 'figlet';
+import chalk from 'chalk';
 import { handleGitOpen, handleGitPush, handleGitCommit } from './commands/git.js';
 
 interface GitArgs {
@@ -13,6 +15,19 @@ interface GitArgs {
 interface CommitArgs {
   message: string;
 }
+
+// 创建 ASCII 艺术字
+const title = figlet.textSync('Only One CLI', {
+  font: 'Standard',
+  horizontalLayout: 'default',
+  verticalLayout: 'default',
+  width: 80,
+  whitespaceBreak: true
+});
+
+// 输出带颜色的标题
+console.log(chalk.cyan(title));
+console.log(chalk.gray('Your command line companion\n'));
 
 yargs(hideBin(process.argv))
   .scriptName('one')
@@ -73,6 +88,7 @@ yargs(hideBin(process.argv))
   .example('$0 git push "feat: new feature"', 'Push changes with a new message')
   .example('$0 git open', 'Open repository in browser')
   .example('$0 o', 'Open in VS Code')
+  .wrap(null)
   .strict()
   .help()
   .alias('h', 'help')
