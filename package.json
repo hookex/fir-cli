@@ -1,0 +1,22 @@
+{
+  "name": "one",
+  "version": "1.0.0",
+  "description": "Personal CLI tools collection written in Deno",
+  "type": "module",
+  "bin": {
+    "one": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "cli",
+    "deno",
+    "tools"
+  ],
+  "author": "hooke",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
