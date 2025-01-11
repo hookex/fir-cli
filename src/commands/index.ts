@@ -76,7 +76,7 @@ export function registerCommands(yargs: Argv): Argv {
         }
       }
     )
-    .command('o', 'Open current directory in VS Code',
+    .command('code', 'Open current directory in VS Code',
       () => {},
       async () => {
         try {
