@@ -1,19 +1,19 @@
-# one
+# one-cli
 
 Personal CLI tools collection written in Deno and published to npm.
 
 ## Installation
 
 ```bash
-npm install -g one
+npm install -g one-cli
 ```
 
 ## Usage
 
-After installation, you can use the CLI with the `one` command:
+After installation, you can use the CLI with the `one-cli` command:
 
 ```bash
-one [command] [options]
+one-cli [command] [options]
 ```
 
 ## Available Commands

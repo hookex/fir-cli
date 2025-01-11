@@ -1,5 +1,5 @@
 {
-  "name": "one",
+  "name": "one-cli",
   "version": "1.0.0",
   "description": "Personal CLI tools collection written in Deno",
   "type": "module",
