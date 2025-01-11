@@ -6,6 +6,7 @@ import open from 'open';
 import figlet from 'figlet';
 import chalk from 'chalk';
 import { handleGitOpen, handleGitPush, handleGitCommit } from './commands/git.js';
+import { getLocalIPs } from './commands/ip.js';
 
 interface GitArgs {
   action: 'push' | 'open';
@@ -74,6 +75,16 @@ const baseCommand = yargs(hideBin(process.argv))
       }
     }
   )
+  .command('ip', 'Show local IP addresses',
+    () => {},
+    () => {
+      try {
+        getLocalIPs();
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
+  )
   .command('o', 'Open current directory in VS Code',
     () => {},
     async () => {
@@ -88,6 +99,7 @@ const baseCommand = yargs(hideBin(process.argv))
   .example('$0 git push', 'Push changes using last commit message')
   .example('$0 git push "feat: new feature"', 'Push changes with a new message')
   .example('$0 git open', 'Open repository in browser')
+  .example('$0 ip', 'Show local IP addresses')
   .example('$0 o', 'Open in VS Code')
   .example('a "fix: update"', 'Short alias for one')
   .example('o "fix: update"', 'Another alias for one')
