@@ -4,6 +4,7 @@ import { getLocalIPs } from './ip.js';
 import { openInVSCode } from './vscode.js';
 import { showTime } from './time.js';
 import { installAndRunGlobalPackage } from './npm.js';
+import { openBrowser } from './browser.js';
 import chalk from 'chalk';
 
 interface GitArgs {
@@ -17,6 +18,23 @@ interface CommitArgs {
 
 // 定义命令配置
 const commands: Array<CommandModule<{}, any>> = [
+  {
+    command: 'chrome [url]',
+    describe: 'Open Chrome browser',
+    builder: (yargs: Argv) => {
+      return yargs.positional('url', {
+        type: 'string',
+        describe: 'URL to open (optional)'
+      });
+    },
+    handler: async (argv: any) => {
+      try {
+        await openBrowser('chrome', argv.url);
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
+  },
   {
     command: 'git <action> [message]',
     describe: 'Git operations',
@@ -149,6 +167,8 @@ export function registerCommands(yargs: Argv): Argv {
 
   // 添加示例
   return yargsInstance
+    .example('$0 chrome', 'Open Chrome browser')
+    .example('$0 chrome https://github.com', 'Open Chrome with specific URL')
     .example('$0 nrm', 'Install and run nrm if not found')
     .example('$0 nrm ls', 'Run nrm with arguments')
     .example('$0 commit "fix: update readme"', 'Commit changes with a message')
