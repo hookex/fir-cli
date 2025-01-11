@@ -4,7 +4,9 @@
   "description": "Personal CLI tools collection",
   "type": "module",
   "bin": {
-    "one": "./dist/cli.js"
+    "one": "./dist/cli.js",
+    "a": "./dist/cli.js",
+    "o": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
