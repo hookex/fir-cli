@@ -1,4 +1,3 @@
-import open from 'open';
 import { execSync, exec } from 'child_process';
 import chalk from 'chalk';
 
@@ -49,10 +48,17 @@ export async function openInVSCode(): Promise<void> {
       }
     }
     
-    // 打开当前目录
-    await open('code .');
+    // 使用 execSync 直接运行 code 命令
+    execSync('code .', { stdio: 'inherit' });
     console.log(chalk.green('Opening VS Code...'));
   } catch (error: any) {
     console.error(chalk.red('Error opening VS Code:'), error.message);
+    // 如果 code 命令失败，尝试直接打开应用
+    try {
+      execSync('open -a "Visual Studio Code" .', { stdio: 'inherit' });
+      console.log(chalk.green('Opened VS Code using alternative method...'));
+    } catch (fallbackError: any) {
+      console.error(chalk.red('Failed to open VS Code using alternative method:'), fallbackError.message);
+    }
   }
 }
