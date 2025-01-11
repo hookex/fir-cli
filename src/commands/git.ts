@@ -1,55 +1,108 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { execSync } from 'child_process';
+import chalk from 'chalk';
 import open from 'open';
+import { generateCommitMessage } from '../services/ai.js';
+import inquirer from 'inquirer';
 
-const execAsync = promisify(exec);
+export async function handleGitCommit(message?: string): Promise<void> {
+  try {
+    let commitMessage = message;
 
-async function getCurrentBranch(): Promise<string> {
-  const { stdout } = await execAsync('git rev-parse --abbrev-ref HEAD');
-  return stdout.trim();
-}
+    if (!commitMessage) {
+      try {
+        // 生成 AI commit 信息
+        const generatedMessage = await generateCommitMessage();
+        
+        // 让用户确认或编辑生成的信息
+        const { action } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'action',
+            message: chalk.cyan('AI generated commit message:') + '\n' + 
+                    chalk.white(generatedMessage) + '\n' +
+                    chalk.cyan('What would you like to do?'),
+            choices: [
+              { name: 'Use this message', value: 'use' },
+              { name: 'Edit message', value: 'edit' },
+              { name: 'Cancel', value: 'cancel' }
+            ]
+          }
+        ]);
 
-async function getLastCommitMessage(): Promise<string> {
-  const { stdout } = await execAsync('git log -1 --pretty=%B');
-  return stdout.trim();
-}
+        if (action === 'cancel') {
+          console.log(chalk.yellow('Commit cancelled'));
+          return;
+        }
 
-async function getHttpsRepoUrl(): Promise<string> {
-  const { stdout } = await execAsync('git remote get-url origin');
-  const url = stdout.trim();
-  
-  // Convert SSH URL to HTTPS URL
-  if (url.startsWith('git@')) {
-    // git@github.com:username/repo.git -> https://github.com/username/repo
-    return url
-      .replace(/^git@([^:]+):/, 'https://$1/')
-      .replace(/\.git$/, '');
+        if (action === 'edit') {
+          const { editedMessage } = await inquirer.prompt([
+            {
+              type: 'input',
+              name: 'editedMessage',
+              message: 'Edit commit message:',
+              default: generatedMessage
+            }
+          ]);
+          commitMessage = editedMessage;
+        } else {
+          commitMessage = generatedMessage;
+        }
+      } catch (error: any) {
+        console.error(chalk.red('Failed to generate commit message:'), error.message);
+        
+        // 如果 AI 生成失败，让用户手动输入
+        const { manualMessage } = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'manualMessage',
+            message: 'Enter commit message manually:',
+            validate: (input: string) => input.length > 0 || 'Commit message cannot be empty'
+          }
+        ]);
+        commitMessage = manualMessage;
+      }
+    }
+
+    // 执行 git commit
+    execSync(`git add .`, { stdio: 'inherit' });
+    execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
+    console.log(chalk.green('✓ Changes committed successfully'));
+  } catch (error: any) {
+    if (error.message.includes('nothing to commit')) {
+      console.error(chalk.yellow('No changes to commit. Stage your changes first using git add'));
+    } else {
+      console.error(chalk.red('Git commit failed:'), error.message);
+    }
   }
-  
-  // Already HTTPS URL, just remove .git suffix if present
-  return url.replace(/\.git$/, '');
-}
-
-export async function handleGitOpen(): Promise<void> {
-  const repoUrl = await getHttpsRepoUrl();
-  await open(repoUrl);
 }
 
 export async function handleGitPush(message?: string): Promise<void> {
-  await execAsync('git add .');
-  if (message) {
-    await execAsync(`git commit -m "${message}"`);
-  } else {
-    const lastMessage = await getLastCommitMessage();
-    await execAsync(`git commit -m "update: ${lastMessage}"`);
+  try {
+    if (message) {
+      await handleGitCommit(message);
+    }
+    const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+    execSync(`git push origin ${currentBranch}`, { stdio: 'inherit' });
+    console.log(chalk.green('✓ Changes pushed successfully'));
+  } catch (error: any) {
+    console.error(chalk.red('Git push failed:'), error.message);
   }
-  const currentBranch = await getCurrentBranch();
-  const { stdout: pushOutput } = await execAsync(`git push origin ${currentBranch}`);
-  console.log(pushOutput || `Successfully pushed to ${currentBranch}`);
 }
 
-export async function handleGitCommit(message: string): Promise<void> {
-  await execAsync('git add .');
-  await execAsync(`git commit -m "${message}"`);
-  console.log(`Committed with message: ${message}`);
+export async function handleGitOpen(): Promise<void> {
+  try {
+    // 获取远程仓库 URL
+    const remoteUrl = execSync('git remote get-url origin').toString().trim();
+    
+    // 转换 SSH 地址为 HTTPS
+    const httpsUrl = remoteUrl
+      .replace(/^git@/, 'https://')
+      .replace(/\.git$/, '')
+      .replace(/:/g, '/');
+
+    await open(httpsUrl);
+    console.log(chalk.green(`✓ Opened ${httpsUrl} in browser`));
+  } catch (error: any) {
+    console.error(chalk.red('Failed to open repository:'), error.message);
+  }
 }
