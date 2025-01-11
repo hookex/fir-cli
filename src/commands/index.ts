@@ -61,9 +61,16 @@ const commands: Array<CommandModule<{}, any>> = [
     command: 'time',
     describe: 'Show current time in Beijing and UTC',
     aliases: ['t'],
-    handler: () => {
+    builder: (yargs: Argv) => {
+      return yargs.option('watch', {
+        alias: 'w',
+        type: 'boolean',
+        describe: 'Auto update time every second'
+      });
+    },
+    handler: (argv: any) => {
       try {
-        showTime();
+        showTime(argv.watch);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -150,6 +157,9 @@ export function registerCommands(yargs: Argv): Argv {
     .example('$0 g open', 'Open repository in browser (alias for git open)')
     .example('$0 i', 'Show local IP addresses (alias for ip)')
     .example('$0 t', 'Show current time (alias for time)')
+    .example('$0 time', 'Show current time')
+    .example('$0 time -w', 'Show auto-updating time (Ctrl+C to stop)')
+    .example('$0 t --watch', 'Another way to show auto-updating time')
     .example('$0 c', 'Open in VS Code (alias for code)')
     .example('$0 o', 'Open in VS Code (another alias for code)');
 }
