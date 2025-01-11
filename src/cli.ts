@@ -2,40 +2,7 @@
 
 import { Command } from 'commander';
 import open from 'open';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-
-const execAsync = promisify(exec);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-async function getCurrentBranch(): Promise<string> {
-  const { stdout } = await execAsync('git rev-parse --abbrev-ref HEAD');
-  return stdout.trim();
-}
-
-async function getLastCommitMessage(): Promise<string> {
-  const { stdout } = await execAsync('git log -1 --pretty=%B');
-  return stdout.trim();
-}
-
-async function getHttpsRepoUrl(): Promise<string> {
-  const { stdout } = await execAsync('git remote get-url origin');
-  const url = stdout.trim();
-  
-  // Convert SSH URL to HTTPS URL
-  if (url.startsWith('git@')) {
-    // git@github.com:username/repo.git -> https://github.com/username/repo
-    return url
-      .replace(/^git@([^:]+):/, 'https://$1/')
-      .replace(/\.git$/, '');
-  }
-  
-  // Already HTTPS URL, just remove .git suffix if present
-  return url.replace(/\.git$/, '');
-}
+import { handleGitOpen, handleGitPush, handleGitCommit } from './commands/git.js';
 
 const program = new Command()
   .name("one")
@@ -50,31 +17,19 @@ program
     try {
       // Handle git open
       if (action === 'git' && subaction === 'open') {
-        const repoUrl = await getHttpsRepoUrl();
-        await open(repoUrl);
+        await handleGitOpen();
         return;
       }
 
       // Handle git push with optional commit
       if (action === 'git' && subaction === 'push') {
-        await execAsync('git add .');
-        if (message) {
-          await execAsync(`git commit -m "${message}"`);
-        } else {
-          const lastMessage = await getLastCommitMessage();
-          await execAsync(`git commit -m "update: ${lastMessage}"`);
-        }
-        const currentBranch = await getCurrentBranch();
-        const { stdout: pushOutput } = await execAsync(`git push origin ${currentBranch}`);
-        console.log(pushOutput || `Successfully pushed to ${currentBranch}`);
+        await handleGitPush(message);
         return;
       }
 
       // Regular commit
       if (action) {
-        await execAsync('git add .');
-        await execAsync(`git commit -m "${action}"`);
-        console.log(`Committed with message: ${action}`);
+        await handleGitCommit(action);
       } else {
         console.log('Usage:\n  one "commit message"\n  one git push\n  one git push "commit message"\n  one git open');
       }
