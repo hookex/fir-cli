@@ -44,35 +44,34 @@ const program = new Command()
 
 program
   .argument("[action]", "git action (e.g., 'git push', 'git open')")
+  .argument("[subaction]", "git subaction (e.g., 'push', 'open')")
   .argument("[message]", "commit message (optional)")
-  .action(async (action?: string, message?: string) => {
+  .action(async (action?: string, subaction?: string, message?: string) => {
     try {
       // Handle git open
-      if (action === 'git' && message?.toLowerCase() === 'open') {
+      if (action === 'git' && subaction === 'open') {
         const repoUrl = await getHttpsRepoUrl();
         await open(repoUrl);
         return;
       }
 
       // Handle git push with optional commit
-      if (action === 'git' && message?.toLowerCase() === 'push') {
+      if (action === 'git' && subaction === 'push') {
         await execAsync('git add .');
-        const currentBranch = await getCurrentBranch();
-        const lastMessage = await getLastCommitMessage();
-        await execAsync(`git commit -m "update: ${lastMessage}"`);
-        const { stdout: pushOutput } = await execAsync(`git push origin ${currentBranch}`);
-        console.log(pushOutput || `Successfully pushed to ${currentBranch}`);
-      } 
-      // Handle git push with custom commit message
-      else if (action === 'git' && message) {
-        await execAsync('git add .');
-        await execAsync(`git commit -m "${message}"`);
+        if (message) {
+          await execAsync(`git commit -m "${message}"`);
+        } else {
+          const lastMessage = await getLastCommitMessage();
+          await execAsync(`git commit -m "update: ${lastMessage}"`);
+        }
         const currentBranch = await getCurrentBranch();
         const { stdout: pushOutput } = await execAsync(`git push origin ${currentBranch}`);
         console.log(pushOutput || `Successfully pushed to ${currentBranch}`);
+        return;
       }
+
       // Regular commit
-      else if (action) {
+      if (action) {
         await execAsync('git add .');
         await execAsync(`git commit -m "${action}"`);
         console.log(`Committed with message: ${action}`);
