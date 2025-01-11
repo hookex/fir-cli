@@ -4,6 +4,7 @@ import { getLocalIPs } from './ip.js';
 import { openInVSCode } from './vscode.js';
 import { showTime } from './time.js';
 import { installAndRunGlobalPackage } from './npm.js';
+import chalk from 'chalk';
 
 interface GitArgs {
   action: 'push' | 'open';
@@ -16,47 +17,6 @@ interface CommitArgs {
 
 // 定义命令配置
 const commands: Array<CommandModule<{}, any>> = [
-  {
-    command: '$0 <command> [args..]',
-    describe: 'Run or install and run a global npm package',
-    builder: (yargs: Argv) => {
-      return yargs
-        .positional('command', {
-          type: 'string',
-          describe: 'Command to run'
-        })
-        .positional('args', {
-          type: 'string',
-          describe: 'Command arguments',
-          array: true
-        });
-    },
-    handler: async (argv: any) => {
-      try {
-        await installAndRunGlobalPackage(argv.command, argv.args || []);
-      } catch (error: any) {
-        console.error("Error:", error.message);
-      }
-    }
-  },
-  {
-    command: '$0 <message>',
-    describe: 'Commit changes with a message',
-    builder: (yargs: Argv) => {
-      return yargs.positional('message', {
-        type: 'string',
-        describe: 'Commit message'
-      });
-    },
-    handler: async (argv: any) => {
-      try {
-        const args = argv as CommitArgs;
-        await handleGitCommit(args.message);
-      } catch (error: any) {
-        console.error("Error:", error.message);
-      }
-    }
-  },
   {
     command: 'git <action> [message]',
     describe: 'Git operations',
@@ -120,6 +80,54 @@ const commands: Array<CommandModule<{}, any>> = [
         console.error("Error opening VS Code:", error.message);
       }
     }
+  },
+  {
+    command: 'commit <message>',
+    describe: 'Commit changes with a message',
+    builder: (yargs: Argv) => {
+      return yargs.positional('message', {
+        type: 'string',
+        describe: 'Commit message'
+      });
+    },
+    handler: async (argv: any) => {
+      try {
+        const args = argv as CommitArgs;
+        await handleGitCommit(args.message);
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
+  },
+  {
+    command: '$0 <command> [args..]',
+    describe: 'Run or install and run a global npm package',
+    builder: (yargs: Argv) => {
+      return yargs
+        .positional('command', {
+          type: 'string',
+          describe: 'Command to run'
+        })
+        .positional('args', {
+          type: 'string',
+          describe: 'Command arguments',
+          array: true
+        });
+    },
+    handler: async (argv: any) => {
+      // 检查是否是内部命令
+      const internalCommands = ['git', 'ip', 'time', 'code', 'commit'];
+      if (internalCommands.includes(argv.command)) {
+        console.error(chalk.red(`Error: '${argv.command}' is an internal command. Use it directly without $0.`));
+        return;
+      }
+
+      try {
+        await installAndRunGlobalPackage(argv.command, argv.args || []);
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
   }
 ];
 
@@ -136,7 +144,7 @@ export function registerCommands(yargs: Argv): Argv {
   return yargsInstance
     .example('$0 nrm', 'Install and run nrm if not found')
     .example('$0 nrm ls', 'Run nrm with arguments')
-    .example('$0 "fix: update readme"', 'Commit changes with a message')
+    .example('$0 commit "fix: update readme"', 'Commit changes with a message')
     .example('$0 g push', 'Push changes using last commit message (alias for git)')
     .example('$0 git push "feat: new feature"', 'Push changes with a new message')
     .example('$0 g open', 'Open repository in browser (alias for git open)')
