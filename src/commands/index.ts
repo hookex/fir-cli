@@ -2,6 +2,7 @@ import { Argv } from 'yargs';
 import { handleGitOpen, handleGitPush, handleGitCommit } from './git.js';
 import { getLocalIPs } from './ip.js';
 import { openInVSCode } from './vscode.js';
+import { showTime } from './time.js';
 
 interface GitArgs {
   action: 'push' | 'open';
@@ -65,6 +66,16 @@ export function registerCommands(yargs: Argv): Argv {
         }
       }
     )
+    .command('time', 'Show current time in Beijing and UTC',
+      () => {},
+      () => {
+        try {
+          showTime();
+        } catch (error: any) {
+          console.error("Error:", error.message);
+        }
+      }
+    )
     .command('o', 'Open current directory in VS Code',
       () => {},
       async () => {
@@ -80,6 +91,7 @@ export function registerCommands(yargs: Argv): Argv {
     .example('$0 git push "feat: new feature"', 'Push changes with a new message')
     .example('$0 git open', 'Open repository in browser')
     .example('$0 ip', 'Show local IP addresses')
+    .example('$0 time', 'Show current time')
     .example('$0 o', 'Open in VS Code')
     .example('a "fix: update"', 'Short alias for one')
     .example('o "fix: update"', 'Another alias for one');
