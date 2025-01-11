@@ -29,7 +29,8 @@ const title = figlet.textSync('Only One CLI', {
 console.log(chalk.cyan(title));
 console.log(chalk.gray('Your command line companion\n'));
 
-yargs(hideBin(process.argv))
+// 创建基础命令
+const baseCommand = yargs(hideBin(process.argv))
   .scriptName('one')
   .usage('$0 [cmd] [args]')
   .command('$0 <message>', 'Commit changes with a message', 
@@ -88,9 +89,37 @@ yargs(hideBin(process.argv))
   .example('$0 git push "feat: new feature"', 'Push changes with a new message')
   .example('$0 git open', 'Open repository in browser')
   .example('$0 o', 'Open in VS Code')
+  .example('a "fix: update"', 'Short alias for one')
+  .example('o "fix: update"', 'Another alias for one')
   .wrap(null)
   .strict()
   .help()
   .alias('h', 'help')
-  .alias('v', 'version')
-  .parse();
+  .alias('v', 'version');
+
+// 创建命令的别名
+const argv = baseCommand.parse();
+
+// 创建软链接
+import { execSync } from 'child_process';
+import { existsSync } from 'fs';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+try {
+  const binPath = process.argv[1];
+  const aPath = binPath.replace(/one$/, 'a');
+  const oPath = binPath.replace(/one$/, 'o');
+
+  if (!existsSync(aPath)) {
+    execSync(`ln -s "${binPath}" "${aPath}"`);
+  }
+  if (!existsSync(oPath)) {
+    execSync(`ln -s "${binPath}" "${oPath}"`);
+  }
+} catch (error) {
+  // 忽略创建软链接时的错误
+}
