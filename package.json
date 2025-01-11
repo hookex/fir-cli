@@ -1,22 +1,27 @@
 {
-  "name": "one-cli",
+  "name": "@hooke/one",
   "version": "1.0.0",
-  "description": "Personal CLI tools collection written in Deno",
+  "description": "Personal CLI tools collection",
   "type": "module",
   "bin": {
     "one": "./dist/cli.js"
   },
-  "files": [
-    "dist"
-  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/cli.ts"
+  },
   "keywords": [
-    "cli",
-    "deno",
-    "tools"
+    "cli"
   ],
   "author": "hooke",
-  "license": "MIT",
-  "engines": {
-    "node": ">=14.0.0"
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "open": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
