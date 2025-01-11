@@ -20,12 +20,14 @@
   "license": "ISC",
   "dependencies": {
     "@types/figlet": "^1.7.0",
+    "@types/inquirer": "^9.0.7",
     "@types/yargs": "^17.0.33",
     "axios": "^1.7.9",
     "chalk": "^5.4.1",
     "commander": "^11.1.0",
     "dayjs": "^1.11.13",
     "figlet": "^1.8.0",
+    "inquirer": "^12.3.0",
     "open": "^9.1.0",
     "yargs": "^17.7.2"
   },

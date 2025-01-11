@@ -1,64 +1,62 @@
-import { execSync, exec } from 'child_process';
+import { execSync } from 'child_process';
 import chalk from 'chalk';
+import inquirer from 'inquirer';
 
-async function checkCodeCommand(): Promise<boolean> {
-  try {
-    execSync('which code', { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
-  }
+interface Editor {
+  name: string;
+  value: string;
+  command: string;
+  appPath: string;
 }
 
-async function installCodeCommand(): Promise<boolean> {
-  console.log(chalk.yellow('VS Code CLI command not found. Installing...'));
-  
-  try {
-    // 检查是否已安装 VS Code
-    const vscodePath = '/Applications/Visual Studio Code.app';
-    if (!execSync(`ls "${vscodePath}"`, { stdio: 'ignore' })) {
-      console.log(chalk.red('VS Code is not installed. Please install VS Code first.'));
-      console.log(chalk.blue('You can download it from: https://code.visualstudio.com/'));
-      return false;
-    }
-
-    // 安装 code 命令
-    console.log(chalk.gray('Installing VS Code CLI command...'));
-    execSync(`ln -s "${vscodePath}/Contents/Resources/app/bin/code" /usr/local/bin/code`);
-    console.log(chalk.green('VS Code CLI command installed successfully!'));
-    return true;
-  } catch (error: any) {
-    if (error.message.includes('Permission denied')) {
-      console.log(chalk.red('Permission denied. Please run with sudo:'));
-      console.log(chalk.yellow('sudo ln -s "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" /usr/local/bin/code'));
-    } else {
-      console.log(chalk.red('Failed to install VS Code CLI command:'), error.message);
-    }
-    return false;
+const EDITORS: Editor[] = [
+  {
+    name: 'VS Code',
+    value: 'vscode',
+    command: 'code',
+    appPath: '/Applications/Visual Studio Code.app'
+  },
+  {
+    name: 'WebStorm',
+    value: 'webstorm',
+    command: 'webstorm',
+    appPath: '/Applications/WebStorm.app'
   }
-}
+];
 
-export async function openInVSCode(): Promise<void> {
+export async function openInEditor(): Promise<void> {
   try {
-    // 检查 code 命令是否可用
-    if (!await checkCodeCommand()) {
-      // 尝试安装 code 命令
-      if (!await installCodeCommand()) {
+    // 使用 inquirer 让用户选择编辑器
+    const { editor } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'editor',
+        message: 'Choose an editor:',
+        choices: EDITORS.map(e => ({ name: e.name, value: e }))
+      }
+    ]);
+
+    const selectedEditor = editor as Editor;
+
+    // 首先尝试使用命令行工具
+    try {
+      execSync(`which ${selectedEditor.command}`, { stdio: 'ignore' });
+      execSync(`${selectedEditor.command} .`, { stdio: 'inherit' });
+      console.log(chalk.green(`✓ Opened current directory in ${selectedEditor.name}`));
+      return;
+    } catch (cmdError) {
+      // 如果命令行工具不可用，尝试直接打开应用
+      console.log(chalk.yellow(`${selectedEditor.command} command not found, trying to open app directly...`));
+      
+      try {
+        execSync(`open -a "${selectedEditor.appPath}" .`);
+        console.log(chalk.green(`✓ Opened current directory in ${selectedEditor.name}`));
         return;
+      } catch (appError) {
+        throw new Error(`Failed to open ${selectedEditor.name}. Please make sure it's installed.`);
       }
     }
-    
-    // 使用 execSync 直接运行 code 命令
-    execSync('code .', { stdio: 'inherit' });
-    console.log(chalk.green('Opening VS Code...'));
   } catch (error: any) {
-    console.error(chalk.red('Error opening VS Code:'), error.message);
-    // 如果 code 命令失败，尝试直接打开应用
-    try {
-      execSync('open -a "Visual Studio Code" .', { stdio: 'inherit' });
-      console.log(chalk.green('Opened VS Code using alternative method...'));
-    } catch (fallbackError: any) {
-      console.error(chalk.red('Failed to open VS Code using alternative method:'), fallbackError.message);
-    }
+    console.error(chalk.red('Error:'), error.message);
   }
 }

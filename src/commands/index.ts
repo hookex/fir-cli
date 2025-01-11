@@ -1,7 +1,7 @@
 import { Argv, CommandModule } from 'yargs';
 import { handleGitOpen, handleGitPush, handleGitCommit } from './git.js';
 import { getLocalIPs } from './ip.js';
-import { openInVSCode } from './vscode.js';
+import { openInEditor } from './vscode.js';
 import { showTime } from './time.js';
 import { installAndRunGlobalPackage } from './npm.js';
 import { openBrowser } from './browser.js';
@@ -96,13 +96,13 @@ const commands: Array<CommandModule<{}, any>> = [
   },
   {
     command: 'code',
-    describe: 'Open current directory in VS Code',
+    describe: 'Open current directory in editor',
     aliases: ['c', 'o'],
     handler: async () => {
       try {
-        await openInVSCode();
+        await openInEditor();
       } catch (error: any) {
-        console.error("Error opening VS Code:", error.message);
+        console.error("Error opening editor:", error.message);
       }
     }
   },
@@ -180,6 +180,7 @@ export function registerCommands(yargs: Argv): Argv {
     .example('$0 time', 'Show current time')
     .example('$0 time -w', 'Show auto-updating time (Ctrl+C to stop)')
     .example('$0 t --watch', 'Another way to show auto-updating time')
-    .example('$0 c', 'Open in VS Code (alias for code)')
-    .example('$0 o', 'Open in VS Code (another alias for code)');
+    .example('$0 c', 'Open in editor (alias for code)')
+    .example('$0 o', 'Open in editor (another alias for code)')
+    .example('$0 code', 'Open current directory in your preferred editor');
 }
