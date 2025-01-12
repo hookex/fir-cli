@@ -2,6 +2,32 @@
 
 A modern CLI tool that enhances your development workflow with AI-powered features.
 
+## Installation
+
+```bash
+npm install -g fir-cli
+```
+
+## Configuration
+
+Create a `.firrc` file in your home directory:
+
+```json
+{
+  "openai": {
+    "apiKey": "your-api-key",
+    "apiBaseUrl": "your-api-base-url",
+    "apiModel": "your-api-model"
+  }
+}
+```
+
+You can also configure using environment variables:
+
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `OPENAI_API_BASE_URL`: Custom API base URL (optional)
+- `OPENAI_API_MODEL`: Custom API model (optional)
+
 ## Features
 
 ### Git Commands
@@ -20,7 +46,7 @@ Example:
 # Basic commit with AI message
 f commit
 
-# Commit with verbose mode (shows detailed changes)
+# Commit with verbose mode
 f c -v
 
 # Example AI-generated message:
@@ -164,34 +190,6 @@ Prevention:
 - Always handle undefined/null cases
 - Use optional chaining and nullish coalescing
 - Add type checking
-```
-
-## Configuration
-
-Create a `.firrc` file in your home directory:
-
-```json
-{
-  "openai": {
-    "apiKey": "your-api-key",
-    "apiBaseUrl": "your-api-base-url",
-    "apiModel": "your-api-model"
-  }
-}
-```
-
-## Environment Variables
-
-Configure the CLI using environment variables:
-
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `OPENAI_API_BASE_URL`: Custom API base URL (optional)
-- `OPENAI_API_MODEL`: Custom API model (optional)
-
-## Installation
-
-```bash
-npm install -g fir-cli
 ```
 
 ## Usage

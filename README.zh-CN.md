@@ -2,6 +2,53 @@
 
 一个现代化的命令行工具，通过 AI 功能增强你的开发工作流程。
 
+[English](./README.md) | [简体中文](./README.zh-CN.md)
+
+## 安装
+
+```bash
+npm install -g fir-cli
+```
+
+## 配置
+
+在你的主目录中创建 `.firrc` 文件：
+
+```json
+{
+  "openai": {
+    "apiKey": "你的-api-密钥",
+    "apiBaseUrl": "你的-api-基础-url",
+    "apiModel": "你的-api-模型"
+  }
+}
+```
+
+你也可以使用环境变量进行配置：
+
+- `OPENAI_API_KEY`：你的 OpenAI API 密钥
+- `OPENAI_API_BASE_URL`：自定义 API 基础 URL（可选）
+- `OPENAI_API_MODEL`：自定义 API 模型（可选）
+
+## 快速开始
+
+1. 初始化 Git 仓库：
+   ```bash
+   git init
+   ```
+
+2. 对代码进行一些更改
+
+3. 使用 AI 生成的消息提交：
+   ```bash
+   f commit
+   ```
+
+4. 推送到远程：
+   ```bash
+   f push
+   ```
+
 ## 功能特性
 
 ### Git 命令
@@ -20,7 +67,7 @@
 # 使用 AI 消息基本提交
 f commit
 
-# 使用详细模式提交（显示详细更改）
+# 使用详细模式提交
 f c -v
 
 # AI 生成的消息示例：
@@ -166,72 +213,17 @@ f debug
 - 添加类型检查
 ```
 
-## 配置
+## 命令参考
 
-在你的主目录中创建 `.firrc` 文件：
+### Git 命令
+- `f commit` (`f c`)：使用 AI 消息提交更改
+- `f push` (`f p`)：推送更改到远程
+- `f open`：在浏览器中打开仓库
+- `f clean`：清理工作目录
 
-```json
-{
-  "openai": {
-    "apiKey": "你的-api-密钥",
-    "apiBaseUrl": "你的-api-基础-url",
-    "apiModel": "你的-api-模型"
-  }
-}
-```
-
-## 环境变量
-
-使用环境变量配置 CLI：
-
-- `OPENAI_API_KEY`：你的 OpenAI API 密钥
-- `OPENAI_API_BASE_URL`：自定义 API 基础 URL（可选）
-- `OPENAI_API_MODEL`：自定义 API 模型（可选）
-
-## 安装
-
-```bash
-npm install -g fir-cli
-```
-
-## 使用方法
-
-1. 初始化 Git 仓库：
-   ```bash
-   git init
-   ```
-
-2. 对代码进行一些更改
-
-3. 使用 AI 提交更改：
-   ```bash
-   f commit
-   ```
-
-4. 推送更改到远程：
-   ```bash
-   f push
-   ```
-
-5. 在浏览器中打开仓库：
-   ```bash
-   f open
-   ```
-
-6. 清理工作目录：
-   ```bash
-   f clean
-   ```
-
-7. 翻译代码：
-   ```bash
-   f translate
-   ```
-
-8. 调试代码：
-   ```bash
-   f debug
-   ```
+### AI 命令
+- `f translate` (`f t`)：在不同语言之间翻译代码
+- `f debug` (`f d`)：使用 AI 辅助调试代码
 
 ## 开发
 
