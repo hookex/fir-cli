@@ -1,4 +1,4 @@
-#!/usr/bin/env node --no-deprecation
+#!/usr/bin/env node
 import figlet from 'figlet';
 import chalk from 'chalk';
 import { registerCommands } from './commands/index.js';
@@ -23,4 +23,7 @@ if (showLogo) {
 }
 
 // 注册命令
-registerCommands();
+registerCommands().catch(error => {
+  console.error('Error:', error);
+  process.exit(1);
+});

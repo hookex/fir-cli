@@ -13,6 +13,7 @@ import { handleConfig } from './config.js';
 import { handleDebug } from './debug.js';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+import { execSync } from 'child_process';
 import { registerAlias, resolveCommand, clearAliases } from '../services/command.js';
 
 interface CommitArgs {
@@ -66,11 +67,13 @@ async function handleCommandConflict(alias: string, matchingCommands: string[]):
 // 查找匹配的命令
 function findMatchingCommands(input: string): string[] {
   const matches: string[] = [];
-  for (const [cmd, config] of Object.entries(commandMap)) {
-    if (config.aliases?.includes(input)) {
-      matches.push(cmd);
+  commands.forEach(cmd => {
+    const { command, aliases = [] } = cmd;
+    const mainCommand = command.split(' ')[0];
+    if (aliases.includes(input)) {
+      matches.push(mainCommand);
     }
-  }
+  });
   return matches;
 }
 
@@ -279,46 +282,52 @@ const commands: Array<any> = [
   }
 ];
 
-export function registerCommands() {
+export async function registerCommands() {
   const yargsInstance = yargs(hideBin(process.argv));
 
-  // 注册所有命令到 commandMap
+  // 初始化 commandMap
   commands.forEach(cmd => {
     const { command, describe, handler, builder, aliases = [] } = cmd;
     const mainCommand = command.split(' ')[0];
     commandMap[mainCommand] = { command, describe, handler, builder, aliases };
   });
 
-  // 处理命令执行
-  yargsInstance.middleware(async (argv) => {
-    const command = argv._[0] as string;
-    if (!command) return;
-
-    const matchingCommands = findMatchingCommands(command);
+  const args = process.argv.slice(2);
+  if (args.length > 0) {
+    const input = args[0];
+    const matchingCommands = findMatchingCommands(input);
     
-    if (matchingCommands.length > 1) {
-      // 有冲突的命令，让用户选择
-      const selectedCommand = await handleCommandConflict(command, matchingCommands);
-      // 更新 argv 中的命令
-      argv._ = [selectedCommand, ...argv._.slice(1)];
+    if (matchingCommands.length > 0) {
+      // 有匹配的命令，让用户选择
+      const selectedCommand = await handleCommandConflict(input, matchingCommands);
+      // 执行选中的命令
+      const newArgs = [selectedCommand, ...args.slice(1)];
+      const cmdPath = process.argv[1];
+      const fullCommand = `node ${cmdPath} ${newArgs.join(' ')}`;
+      try {
+        execSync(fullCommand, { stdio: 'inherit' });
+        process.exit(0);
+      } catch (error) {
+        process.exit(1);
+      }
     }
-  });
+  }
 
   // 注册所有命令
   commands.forEach(cmd => {
     const { command, describe, handler, builder, aliases = [] } = cmd;
     yargsInstance.command(command, describe, builder || {}, handler);
-    if (aliases.length > 0) {
-      yargsInstance.alias(command.split(' ')[0], aliases);
-    }
   });
 
-  yargsInstance
-    .help()
-    .alias('help', 'h')
-    .demandCommand(1, '')
-    .strict()
-    .parse();
-
-  return yargsInstance;
+  return new Promise((resolve, reject) => {
+    yargsInstance
+      .help()
+      .alias('help', 'h')
+      .demandCommand(1, '')
+      .strict()
+      .parse(process.argv.slice(2), (err: Error | null, argv: any, output: string) => {
+        if (err) reject(err);
+        else resolve(argv);
+      });
+  });
 }
