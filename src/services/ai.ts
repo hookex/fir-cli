@@ -85,12 +85,9 @@ export async function generateCommitMessage(verbose: boolean = false, language: 
 
     // 验证 commit message 格式
     if (!isValidCommitMessage(commitMessage)) {
-      console.log(chalk.yellow('\nInvalid commit message format:'));
-      console.log(chalk.gray(commitMessage));
-      console.log(chalk.yellow('\nExpected format:'), chalk.cyan('type: description'));
-      console.log(chalk.yellow('Valid types:'), chalk.cyan('feat, fix, docs, style, refactor, test, chore'));
-      console.log(chalk.yellow('Example:'), chalk.cyan('feat: add new command for git operations\n'));
-      throw new Error('Generated commit message does not follow conventional commits format');
+      console.log(chalk.yellow('\nWarning: Generated commit message does not follow conventional commits format'));
+      console.log(chalk.gray('Format should be: type: description'));
+      console.log(chalk.gray('Example: feat: add new command'));
     }
 
     return commitMessage;

@@ -9,6 +9,7 @@ import { installAndRunGlobalPackage as handleNpmCommand } from './npm.js';
 import { handlePing } from './ping.js';
 import { handleAI } from './ai.js';
 import { handleTranslate } from './translate.js';
+import { handleConfig } from './config.js';
 import chalk from 'chalk';
 
 interface CommitArgs {
@@ -201,6 +202,22 @@ const commands: Array<any> = [
     handler: (argv: any) => handleTranslate(argv.text)
   },
   {
+    command: 'config',
+    describe: 'Configure settings and view history',
+    handler: async () => {
+      try {
+        await handleConfig();
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
+  },
+  {
+    command: 'ai [question]',
+    describe: 'Chat with AI assistant',
+    handler: (argv: any) => handleAI(argv.question)
+  },
+  {
     command: 'clean',
     describe: 'Clean git changes, restore modified files and remove untracked files',
     handler: async () => {
@@ -301,8 +318,19 @@ export function registerCommands() {
     })
     .command({
       command: 'ai [question]',
-      describe: 'Configure AI settings or ask a question',
+      describe: 'Chat with AI assistant',
       handler: (argv: any) => handleAI(argv.question)
+    })
+    .command({
+      command: 'config',
+      describe: 'Configure settings and view history',
+      handler: async () => {
+        try {
+          await handleConfig();
+        } catch (error: any) {
+          console.error("Error:", error.message);
+        }
+      }
     })
     .command({
       command: 'commit [message]',
