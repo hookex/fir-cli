@@ -6,10 +6,6 @@ import { createAliases } from './utils/aliases.js';
 
 process.env.NODE_NO_WARNINGS = '1';
 
-// 创建命令行别名
-console.log('Binary path:', process.argv[1]);
-createAliases(process.argv[1]);
-
 // 显示欢迎信息
 console.log(
   chalk.cyan(

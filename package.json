@@ -1,7 +1,7 @@
 {
   "name": "fir-cli",
   "version": "1.0.5",
-  "description": "Personal CLI tools collection with AI-powered Git commit messages",
+  "description": "A command line tool for daily development",
   "type": "module",
   "main": "./dist/cli.js",
   "bin": {

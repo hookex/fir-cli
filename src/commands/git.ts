@@ -112,15 +112,15 @@ export async function handleGitOpen(): Promise<void> {
     // 获取远程仓库 URL
     const remoteUrl = execSync('git remote get-url origin').toString().trim();
     
-    // 转换 SSH 地址为 HTTPS
+    // 转换 SSH URL 为 HTTPS URL
     const httpsUrl = remoteUrl
       .replace(/^git@/, 'https://')
       .replace(/\.git$/, '')
-      .replace(/:/g, '/');
-
+      .replace(/:([\w-]+\/[\w-]+)$/, '/$1');
+    
+    console.log(`✓ Opened ${httpsUrl} in browser`);
     await open(httpsUrl);
-    console.log(chalk.green(`✓ Opened ${httpsUrl} in browser`));
   } catch (error: any) {
-    console.error(chalk.red('Failed to open repository:'), error.message);
+    console.error('Error:', error.message);
   }
 }
