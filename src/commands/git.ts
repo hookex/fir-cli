@@ -2,10 +2,45 @@ import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { generateCommitMessage } from '../services/ai.js';
 import ora from 'ora';
+import inquirer from 'inquirer';
 
 // 处理 commit 命令
 export async function handleGitCommit(verbose?: boolean) {
   try {
+    // 获取未暂存的更改
+    function getUnstagedChanges(): string[] {
+      try {
+        return execSync('git ls-files --modified --others --exclude-standard', { encoding: 'utf-8' })
+          .trim()
+          .split('\n')
+          .filter(Boolean);
+      } catch (error) {
+        return [];
+      }
+    }
+
+    // 检查是否有未暂存的更改
+    const unstagedChanges = getUnstagedChanges();
+    if (unstagedChanges.length > 0) {
+      console.log(chalk.yellow('\nUnstaged changes found:'));
+      unstagedChanges.forEach(file => console.log(chalk.gray(`  ${file}`)));
+      
+      const { autoAdd } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'autoAdd',
+        message: 'Would you like to stage these changes?',
+        default: true
+      }]);
+
+      if (autoAdd) {
+        execSync('git add .', { stdio: 'inherit' });
+        console.log(chalk.green('✓ Changes staged'));
+      } else {
+        console.log(chalk.yellow('Please stage your changes manually before committing'));
+        return;
+      }
+    }
+
     // 检查是否有暂存的更改
     const status = execSync('git status --porcelain').toString();
     if (!status) {
