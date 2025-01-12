@@ -6,6 +6,7 @@ import { getLocalIPs as handleIp } from './ip.js';
 import { showTime as handleTime } from './time.js';
 import { openInEditor as handleVSCode } from './vscode.js';
 import { installAndRunGlobalPackage as handleNpmCommand } from './npm.js';
+import { handlePing } from './ping.js';
 import chalk from 'chalk';
 
 interface GitArgs {
@@ -148,6 +149,11 @@ const commands: Array<any> = [
     }
   },
   {
+    command: 'ping [domain]',
+    describe: 'Ping domain(s)',
+    handler: (argv: any) => handlePing(argv.domain)
+  },
+  {
     command: '$0 <command> [args..]',
     describe: 'Run or install and run a global npm package',
     builder: (yargs: Argv) => {
@@ -164,7 +170,7 @@ const commands: Array<any> = [
     },
     handler: async (argv: any) => {
       // 检查是否是内部命令
-      const internalCommands = ['git', 'ip', 'time', 'code', 'commit', 'push'];
+      const internalCommands = ['git', 'ip', 'time', 'code', 'commit', 'push', 'ping'];
       if (internalCommands.includes(argv.command)) {
         console.error(chalk.red(`Error: '${argv.command}' is an internal command. Use it directly without $0.`));
         return;
@@ -212,6 +218,8 @@ export function registerCommands() {
     .example('fir code', 'Open current directory in your preferred editor')
     .example('fir commit -v', 'Show diff when generating commit message')
     .example('fir commit --verbose', 'Show diff when generating commit message')
+    .example('fir ping', 'Ping top 10 most visited domains')
+    .example('fir ping github.com', 'Ping specific domain')
     .demandCommand(1, 'Not enough non-option arguments: got 0, need at least 1')
     .help()
     .alias('h', 'help')
