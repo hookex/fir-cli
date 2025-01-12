@@ -1,6 +1,6 @@
 {
   "name": "fir-cli",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A command line tool for daily development",
   "type": "module",
   "main": "./dist/cli.js",
