@@ -304,9 +304,19 @@ export function registerCommands() {
       command: '*',
       describe: 'Run or install and run a global npm package',
       handler: (argv: ArgumentsCamelCase<any>) => {
-        const command = argv._[0] as string;
-        const args = argv._.slice(1).map(arg => String(arg));
-        handleNpmCommand(command, args);
+        const [command, ...args] = argv._;
+        if (!command) {
+          console.log(chalk.yellow('\nPlease provide a command or use --help to see available commands.\n'));
+          console.log('Example commands:');
+          console.log(chalk.cyan('  f commit') + '           - Commit changes with AI-generated message');
+          console.log(chalk.cyan('  f push') + '            - Push changes to remote repository');
+          console.log(chalk.cyan('  f g open') + '          - Open repository in browser');
+          console.log(chalk.cyan('  f ping') + '            - Ping top 10 most visited domains');
+          console.log(chalk.cyan('  f time') + '            - Show current time');
+          console.log(chalk.cyan('  f nrm ls') + '          - Run nrm with arguments\n');
+          return;
+        }
+        handleNpmCommand(String(command), args.map(arg => String(arg)));
       }
     })
     .demandCommand(1, 'Not enough non-option arguments: got 0, need at least 1')
