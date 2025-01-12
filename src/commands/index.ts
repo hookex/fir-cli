@@ -300,9 +300,9 @@ export function registerCommands() {
       handler: (argv: ArgumentsCamelCase<PingArgs>) => handlePing(argv.domain)
     })
     .command({
-      command: 'ai',
-      describe: 'Configure AI settings',
-      handler: handleAI
+      command: 'ai [question]',
+      describe: 'Configure AI settings or ask a question',
+      handler: (argv: any) => handleAI(argv.question)
     })
     .command({
       command: 'commit [message]',
