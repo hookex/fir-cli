@@ -1,10 +1,11 @@
-import { Argv, CommandModule } from 'yargs';
-import { handleGitOpen, handleGitPush, handleGitCommit } from './git.js';
-import { getLocalIPs } from './ip.js';
-import { openInEditor } from './vscode.js';
-import { showTime } from './time.js';
-import { installAndRunGlobalPackage } from './npm.js';
-import { openBrowser } from './browser.js';
+import yargs, { Argv } from 'yargs';
+import { hideBin } from 'yargs/helpers';
+import { openBrowser as handleChrome } from './browser.js';
+import { handleGitOpen, handleGitCommit, handleGitPush } from './git.js';
+import { getLocalIPs as handleIp } from './ip.js';
+import { showTime as handleTime } from './time.js';
+import { openInEditor as handleVSCode } from './vscode.js';
+import { installAndRunGlobalPackage as handleNpmCommand } from './npm.js';
 import chalk from 'chalk';
 
 interface GitArgs {
@@ -13,11 +14,11 @@ interface GitArgs {
 }
 
 interface CommitArgs {
-  message: string;
+  message?: string;
 }
 
 // 定义命令配置
-const commands: Array<CommandModule<{}, any>> = [
+const commands: Array<any> = [
   {
     command: 'chrome [url]',
     describe: 'Open Chrome browser',
@@ -29,7 +30,7 @@ const commands: Array<CommandModule<{}, any>> = [
     },
     handler: async (argv: any) => {
       try {
-        await openBrowser('chrome', argv.url);
+        await handleChrome('chrome', argv.url);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -85,7 +86,7 @@ const commands: Array<CommandModule<{}, any>> = [
     aliases: ['i'],
     handler: async () => {
       try {
-        await getLocalIPs();
+        await handleIp();
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -104,7 +105,7 @@ const commands: Array<CommandModule<{}, any>> = [
     },
     handler: (argv: any) => {
       try {
-        showTime(argv.watch);
+        handleTime(argv.watch);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -116,7 +117,7 @@ const commands: Array<CommandModule<{}, any>> = [
     aliases: ['c', 'o'],
     handler: async () => {
       try {
-        await openInEditor();
+        await handleVSCode();
       } catch (error: any) {
         console.error("Error opening editor:", error.message);
       }
@@ -170,7 +171,7 @@ const commands: Array<CommandModule<{}, any>> = [
       }
 
       try {
-        await installAndRunGlobalPackage(argv.command, argv.args || []);
+        await handleNpmCommand(argv.command, argv.args || []);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -179,16 +180,18 @@ const commands: Array<CommandModule<{}, any>> = [
 ];
 
 // 注册所有命令
-export function registerCommands(yargs: Argv): Argv {
-  let yargsInstance = yargs;
-  
+export function registerCommands() {
+  let yargsInstance = yargs(hideBin(process.argv))
+    .scriptName('fir')
+    .usage('$0 <command> [options]');
+
   // 注册每个命令
   commands.forEach(cmd => {
     yargsInstance = yargsInstance.command(cmd);
   });
 
   // 添加示例
-  return yargsInstance
+  yargsInstance = yargsInstance
     .example('fir chrome', 'Open Chrome browser')
     .example('fir chrome https://github.com', 'Open Chrome with specific URL')
     .example('fir nrm', 'Install and run nrm if not found')
@@ -209,10 +212,11 @@ export function registerCommands(yargs: Argv): Argv {
     .example('fir code', 'Open current directory in your preferred editor')
     .example('fir commit -v', 'Show diff when generating commit message')
     .example('fir commit --verbose', 'Show diff when generating commit message')
-    .usage('fir <command> [options]')
     .demandCommand(1, 'Not enough non-option arguments: got 0, need at least 1')
     .help()
     .alias('h', 'help')
     .version()
     .alias('v', 'version');
+
+  return yargsInstance;
 }
