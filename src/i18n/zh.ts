@@ -102,6 +102,15 @@ export default {
     },
     debug: {
       desc: '分析最后一次命令执行'
+    },
+    statistics: {
+      desc: '显示各类型文件的代码统计',
+      title: '代码统计',
+      header: '文件类型',
+      files: '文件数',
+      lines: '行数',
+      percentage: '占比',
+      total: '总计'
     }
   },
   common: {

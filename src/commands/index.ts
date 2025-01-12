@@ -10,6 +10,7 @@ import { handleTranslate } from './translate.js';
 import { handleConfig } from './config.js';
 import { handleAI } from './ai.js';
 import { handleDebug } from './debug.js';
+import { handleStatistics } from './statistics.js';
 import { t } from '../i18n/index.js';
 
 interface CommitArgs {
@@ -175,6 +176,12 @@ const commands: Command[] = [
     describe: t('commands.debug.desc'),
     aliases: ['d', 'de'],
     handler: handleDebug
+  },
+  {
+    command: 'statistics',
+    aliases: ['s', 'st', 'stats'],
+    handler: handleStatistics,
+    describe: t('commands.statistics.desc')
   }
 ];
 

@@ -102,6 +102,15 @@ export default {
     },
     debug: {
       desc: 'Analyze last command execution'
+    },
+    statistics: {
+      desc: 'Show code statistics by file extension',
+      title: 'Code Statistics',
+      header: 'Extension',
+      files: 'Files',
+      lines: 'Lines',
+      percentage: 'Percentage',
+      total: 'Total'
     }
   },
   common: {

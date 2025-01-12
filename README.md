@@ -4,6 +4,17 @@ A modern CLI tool that enhances your development workflow with AI-powered featur
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
+## Features
+
+- 🌐 **Multi-language Support**: Switch between English and Chinese interfaces
+- 🤖 **AI Integration**: Built-in AI assistant for various tasks
+- ⌚ **Time Display**: Show current time in Beijing and UTC
+- 🌍 **IP Information**: Display both local and public IP addresses
+- 🔄 **Git Operations**: Streamlined git workflow with AI-powered commit messages
+- 🌐 **Translation**: Quick English-Chinese text translation
+- ⚙️ **Configuration**: Easy-to-use settings management
+- 🎯 **Smart Aliases**: Intuitive command aliases for faster operation
+
 ## Installation
 
 ```bash
@@ -86,6 +97,7 @@ Or use environment variables:
 | Other Commands |
 | `f config` | `f c`, `f co` | Configure CLI settings | `f config set openai.apiKey "your-key"` |
 | `f help` | - | Show help information | `f help commit` |
+| `f statistics` | - | Show code statistics by file extension | `f statistics` |
 
 ## Features
 
@@ -250,6 +262,28 @@ Prevention:
 - Use optional chaining and nullish coalescing
 - Add type checking
 ```
+
+## New in v1.0.13
+
+### Multi-language Support
+- 🌐 Full interface localization in English and Chinese
+- 🔄 Easy language switching through config menu
+- 📝 Localized command outputs and messages
+- 🎯 Consistent formatting across languages
+- 💡 AI responses in your preferred language
+
+### Enhanced Output Formatting
+- ⚡ Aligned and structured command outputs
+- 🎨 Better visual organization of information
+- 📊 Consistent spacing and indentation
+- 🔍 Clear separation of different data types
+- ✨ Improved readability for all commands
+
+### Other Improvements
+- 🛠️ Enhanced error handling
+- ⚡ Optimized performance
+- 🔄 Smoother language switching
+- 📱 Better terminal UI experience
 
 ## Development
 
