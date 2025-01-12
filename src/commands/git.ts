@@ -4,53 +4,53 @@ import { generateCommitMessage } from '../services/ai.js';
 import ora from 'ora';
 import inquirer from 'inquirer';
 
+// 获取未暂存的更改
+function getUnstagedChanges(): string[] {
+  try {
+    return execSync('git ls-files --modified --others --exclude-standard', { encoding: 'utf-8' })
+      .trim()
+      .split('\n')
+      .filter(Boolean);
+  } catch (error) {
+    return [];
+  }
+}
+
+// 显示 Git 状态
+function showGitStatus(): boolean {
+  try {
+    // 获取状态信息
+    const status = execSync('git status --porcelain').toString();
+    const diff = execSync('git diff --cached --stat').toString();
+    
+    if (!status && !diff) {
+      console.log(chalk.yellow('No changes detected'));
+      return false;
+    }
+
+    console.log(chalk.cyan('\nCurrent changes:'));
+    console.log(chalk.gray('----------------------------------------'));
+    
+    if (status) {
+      console.log(status);
+    }
+    
+    if (diff) {
+      console.log('\nStaged changes:');
+      console.log(diff);
+    }
+    
+    console.log(chalk.gray('----------------------------------------'));
+    return true;
+  } catch (error) {
+    console.error(chalk.red('Error getting git status:'), error);
+    return false;
+  }
+}
+
 // 处理 commit 命令
 export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
   try {
-    // 获取未暂存的更改
-    function getUnstagedChanges(): string[] {
-      try {
-        return execSync('git ls-files --modified --others --exclude-standard', { encoding: 'utf-8' })
-          .trim()
-          .split('\n')
-          .filter(Boolean);
-      } catch (error) {
-        return [];
-      }
-    }
-
-    // 显示 Git 状态
-    function showGitStatus() {
-      try {
-        // 获取状态信息
-        const status = execSync('git status --porcelain').toString();
-        const diff = execSync('git diff --cached --stat').toString();
-        
-        if (!status && !diff) {
-          console.log(chalk.yellow('No changes detected'));
-          return false;
-        }
-
-        console.log(chalk.cyan('\nCurrent changes:'));
-        console.log(chalk.gray('----------------------------------------'));
-        
-        if (status) {
-          console.log(status);
-        }
-        
-        if (diff) {
-          console.log('\nStaged changes:');
-          console.log(diff);
-        }
-        
-        console.log(chalk.gray('----------------------------------------'));
-        return true;
-      } catch (error) {
-        console.error(chalk.red('Error getting git status:'), error);
-        return false;
-      }
-    }
-
     // 检查是否有未暂存的更改
     const unstagedChanges = getUnstagedChanges();
     if (unstagedChanges.length > 0) {
@@ -126,40 +126,10 @@ export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
 // 处理 push 命令
 export async function handleGitPush(verbose?: boolean) {
   try {
-    // 显示当前状态
-    function showGitStatus() {
-      try {
-        // 获取状态信息
-        const status = execSync('git status --porcelain').toString();
-        const diff = execSync('git diff --cached --stat').toString();
-        
-        if (!status && !diff) {
-          console.log(chalk.yellow('No changes detected'));
-          return false;
-        }
-
-        console.log(chalk.cyan('\nCurrent changes:'));
-        console.log(chalk.gray('----------------------------------------'));
-        
-        if (status) {
-          console.log(status);
-        }
-        
-        if (diff) {
-          console.log('\nStaged changes:');
-          console.log(diff);
-        }
-        
-        console.log(chalk.gray('----------------------------------------'));
-        return true;
-      } catch (error) {
-        console.error(chalk.red('Error getting git status:'), error);
-        return false;
-      }
+    // 显示当前状态并检查是否有更改
+    if (!showGitStatus()) {
+      return;
     }
-
-    // 显示当前状态
-    showGitStatus();
 
     // 执行 git commit
     const commitSuccess = await handleGitCommit(verbose);
