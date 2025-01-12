@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
+import readline from 'readline';
 
-interface NpmPackage {
+export interface NpmPackage {
   name: string;
   description: string;
   version: string;
@@ -34,4 +35,26 @@ export async function searchNpmPackages(query: string): Promise<NpmPackage[]> {
     console.error('Error searching npm packages:', error);
     return [];
   }
+}
+
+export async function promptPackageSelection(packages: NpmPackage[]): Promise<NpmPackage | null> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  return new Promise((resolve) => {
+    console.log('\nSelect a package to install (1-5), or press Enter to cancel:');
+    
+    rl.question('> ', (answer) => {
+      rl.close();
+      
+      const index = parseInt(answer) - 1;
+      if (isNaN(index) || index < 0 || index >= packages.length) {
+        resolve(null);
+      } else {
+        resolve(packages[index]);
+      }
+    });
+  });
 }
