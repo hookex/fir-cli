@@ -302,15 +302,25 @@ export async function registerCommands() {
     yargsInstance.command(command, describe, builder || {}, handler);
   });
 
+  yargsInstance
+    .scriptName('f')
+    .usage('$0 <command> [options]')
+    .help()
+    .alias('help', 'h')
+    .version()
+    .alias('version', 'v')
+    .demandCommand(0)
+    .showHelpOnFail(true)
+    .strict();
+
   return new Promise((resolve, reject) => {
-    yargsInstance
-      .help()
-      .alias('help', 'h')
-      .demandCommand(1, '')
-      .strict()
-      .parse(process.argv.slice(2), (err: Error | null, argv: any, output: string) => {
-        if (err) reject(err);
-        else resolve(argv);
-      });
+    yargsInstance.parse(process.argv.slice(2), (err: Error | null, argv: any, output: string) => {
+      if (err) {
+        yargsInstance.showHelp();
+        process.exit(1);
+      } else {
+        resolve(argv);
+      }
+    });
   });
 }
