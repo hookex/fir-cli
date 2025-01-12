@@ -9,10 +9,9 @@ export async function handleAI() {
       value: 'show'
     },
     {
-      name: 'Toggle language (English/Chinese)',
+      name: 'Toggle commit message language (English/Chinese)',
       value: 'language'
     },
-    // 在这里添加更多选项
     {
       name: 'Exit',
       value: 'exit'

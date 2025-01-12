@@ -51,7 +51,7 @@ export function saveConfig(config: AIConfig) {
 export function showConfig() {
   const config = getConfig();
   console.log('\nCurrent AI Configuration:');
-  console.log(chalk.cyan('Language:'), config.useChinese ? 'Chinese' : 'English');
+  console.log(chalk.cyan('Commit Message Language:'), config.useChinese ? 'Chinese' : 'English');
   // 在这里添加更多配置项的显示
   console.log();
 }
@@ -61,5 +61,5 @@ export function toggleLanguage() {
   const config = getConfig();
   config.useChinese = !config.useChinese;
   saveConfig(config);
-  console.log(chalk.green(`✓ Language set to ${config.useChinese ? 'Chinese' : 'English'}`));
+  console.log(chalk.green(`✓ Commit message language set to ${config.useChinese ? 'Chinese' : 'English'}`));
 }
