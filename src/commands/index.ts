@@ -158,41 +158,41 @@ const commands: Array<any> = [
     describe: 'Ping domain(s)',
     handler: (argv: any) => handlePing(argv.domain)
   },
-  {
-    command: '$0 <command> [args..]',
-    describe: 'Run or install and run a global npm package',
-    builder: (yargs: Argv) => {
-      return yargs
-        .positional('command', {
-          type: 'string',
-          describe: 'Command to run'
-        })
-        .positional('args', {
-          type: 'string',
-          describe: 'Command arguments',
-          array: true
-        });
-    },
-    handler: async (argv: any) => {
-      const command = argv.command;
+  // {
+  //   command: '$0 <command> [args..]',
+  //   describe: 'Run or install and run a global npm package',
+  //   builder: (yargs: Argv) => {
+  //     return yargs
+  //       .positional('command', {
+  //         type: 'string',
+  //         describe: 'Command to run'
+  //       })
+  //       .positional('args', {
+  //         type: 'string',
+  //         describe: 'Command arguments',
+  //         array: true
+  //       });
+  //   },
+  //   handler: async (argv: any) => {
+  //     const command = argv.command;
       
-      try {
-        // 检查是否是内部命令或别名
-        const resolvedCommand = await resolveCommand(command);
-        if (resolvedCommand) {
-          // 如果是别名，使用原始命令
-          const args = argv.args || [];
-          argv._ = [resolvedCommand.name, ...args];
-          return;
-        }
+  //     try {
+  //       // 检查是否是内部命令或别名
+  //       const resolvedCommand = await resolveCommand(command);
+  //       if (resolvedCommand) {
+  //         // 如果是别名，使用原始命令
+  //         const args = argv.args || [];
+  //         argv._ = [resolvedCommand.name, ...args];
+  //         return;
+  //       }
 
-        // 如果不是内部命令或别名，尝试作为 npm 包运行
-        await handleNpmCommand(command, argv.args || []);
-      } catch (error: any) {
-        console.error("Error:", error.message);
-      }
-    }
-  },
+  //       // 如果不是内部命令或别名，尝试作为 npm 包运行
+  //       await handleNpmCommand(command, argv.args || []);
+  //     } catch (error: any) {
+  //       console.error("Error:", error.message);
+  //     }
+  //   }
+  // },
   {
     command: 'translate <text>',
     aliases: ['t'],
