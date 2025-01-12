@@ -23,4 +23,4 @@ if (showLogo) {
 }
 
 // 注册命令
-registerCommands().parse();
+registerCommands();

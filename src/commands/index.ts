@@ -12,6 +12,7 @@ import { handleTranslate } from './translate.js';
 import { handleConfig } from './config.js';
 import { handleDebug } from './debug.js';
 import chalk from 'chalk';
+import inquirer from 'inquirer';
 import { registerAlias, resolveCommand, clearAliases } from '../services/command.js';
 
 interface CommitArgs {
@@ -28,6 +29,49 @@ interface TimeArgs {
 
 interface PingArgs {
   domain?: string;
+}
+
+// 存储命令和别名的映射关系
+interface CommandMap {
+  [key: string]: {
+    command: string;
+    describe: string;
+    handler: (...args: any[]) => any;
+    builder?: (yargs: Argv) => Argv;
+    aliases?: string[];
+  };
+}
+
+const commandMap: CommandMap = {};
+
+// 处理命令冲突
+async function handleCommandConflict(alias: string, matchingCommands: string[]): Promise<string> {
+  console.log(chalk.yellow(`\n命令 '${alias}' 有多个匹配项：`));
+  
+  const { selectedCommand } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectedCommand',
+      message: '请选择要执行的命令：',
+      choices: matchingCommands.map(cmd => ({
+        name: `${cmd} - ${commandMap[cmd].describe}`,
+        value: cmd
+      }))
+    }
+  ]);
+
+  return selectedCommand;
+}
+
+// 查找匹配的命令
+function findMatchingCommands(input: string): string[] {
+  const matches: string[] = [];
+  for (const [cmd, config] of Object.entries(commandMap)) {
+    if (config.aliases?.includes(input)) {
+      matches.push(cmd);
+    }
+  }
+  return matches;
 }
 
 // 定义命令配置
@@ -51,7 +95,7 @@ const commands: Array<any> = [
   },
   {
     command: 'push',
-    aliases: ['p'],
+    aliases: ['p', 'pu'],
     describe: 'Push changes with optional commit message (uses AI if message is empty)',
     builder: (yargs: Argv) => {
       return yargs.option('verbose', {
@@ -71,7 +115,7 @@ const commands: Array<any> = [
   {
     command: 'git <action>',
     describe: 'Git operations',
-    aliases: ['g'],
+    aliases: ['g', 'gi'],
     builder: (yargs: Argv) => {
       return yargs
         .positional('action', {
@@ -93,7 +137,7 @@ const commands: Array<any> = [
   {
     command: 'ip',
     describe: 'Show local IP addresses',
-    aliases: ['i'],
+    aliases: ['i', 'ip'],
     handler: async () => {
       try {
         await handleIp();
@@ -105,7 +149,7 @@ const commands: Array<any> = [
   {
     command: 'time',
     describe: 'Show current time in Beijing and UTC',
-    aliases: ['tm'],
+    aliases: ['t', 'ti'],
     builder: (yargs: Argv) => {
       return yargs.option('watch', {
         alias: 'w',
@@ -124,7 +168,7 @@ const commands: Array<any> = [
   {
     command: 'code',
     describe: 'Open current directory in editor',
-    aliases: ['e', 'o'],
+    aliases: ['c', 'co'],
     handler: async () => {
       try {
         await handleVSCode();
@@ -135,6 +179,7 @@ const commands: Array<any> = [
   },
   {
     command: 'commit',
+    aliases: ['c', 'co', 'com'],
     describe: 'Commit changes with a message (uses AI if message is empty)',
     builder: (yargs: Argv) => {
       return yargs
@@ -158,44 +203,44 @@ const commands: Array<any> = [
     describe: 'Ping domain(s)',
     handler: (argv: any) => handlePing(argv.domain)
   },
-  // {
-  //   command: '$0 <command> [args..]',
-  //   describe: 'Run or install and run a global npm package',
-  //   builder: (yargs: Argv) => {
-  //     return yargs
-  //       .positional('command', {
-  //         type: 'string',
-  //         describe: 'Command to run'
-  //       })
-  //       .positional('args', {
-  //         type: 'string',
-  //         describe: 'Command arguments',
-  //         array: true
-  //       });
-  //   },
-  //   handler: async (argv: any) => {
-  //     const command = argv.command;
+  {
+    command: 'install [args..]',
+    describe: 'Run or install and run a global npm package',
+    builder: (yargs: Argv) => {
+      return yargs
+        .positional('command', {
+          type: 'string',
+          describe: 'Command to run'
+        })
+        .positional('args', {
+          type: 'string',
+          describe: 'Command arguments',
+          array: true
+        });
+    },
+    handler: async (argv: any) => {
+      const command = argv.command;
       
-  //     try {
-  //       // 检查是否是内部命令或别名
-  //       const resolvedCommand = await resolveCommand(command);
-  //       if (resolvedCommand) {
-  //         // 如果是别名，使用原始命令
-  //         const args = argv.args || [];
-  //         argv._ = [resolvedCommand.name, ...args];
-  //         return;
-  //       }
+      try {
+        // 检查是否是内部命令或别名
+        const resolvedCommand = await resolveCommand(command);
+        if (resolvedCommand) {
+          // 如果是别名，使用原始命令
+          const args = argv.args || [];
+          argv._ = [resolvedCommand.name, ...args];
+          return;
+        }
 
-  //       // 如果不是内部命令或别名，尝试作为 npm 包运行
-  //       await handleNpmCommand(command, argv.args || []);
-  //     } catch (error: any) {
-  //       console.error("Error:", error.message);
-  //     }
-  //   }
-  // },
+        // 如果不是内部命令或别名，尝试作为 npm 包运行
+        await handleNpmCommand(command, argv.args || []);
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
+  },
   {
     command: 'translate <text>',
-    aliases: ['t'],
+    aliases: ['t', 'tr'],
     describe: 'Translate text between English and Chinese',
     handler: (argv: any) => handleTranslate(argv.text)
   },
@@ -228,79 +273,52 @@ const commands: Array<any> = [
   },
   {
     command: 'debug',
-    aliases: ['d'],
+    aliases: ['d', 'de'],
     describe: 'Analyze last command execution',
     handler: handleDebug
   }
 ];
 
 export function registerCommands() {
-  // 清除之前的别名注册
-  clearAliases();
+  const yargsInstance = yargs(hideBin(process.argv));
 
-  // 注册所有命令的别名
+  // 注册所有命令到 commandMap
   commands.forEach(cmd => {
-    if (cmd.aliases) {
-      cmd.aliases.forEach((alias: string) => {
-        registerAlias(alias, {
-          name: cmd.command.split(' ')[0],
-          description: cmd.describe,
-          aliases: cmd.aliases
-        });
-      });
+    const { command, describe, handler, builder, aliases = [] } = cmd;
+    const mainCommand = command.split(' ')[0];
+    commandMap[mainCommand] = { command, describe, handler, builder, aliases };
+  });
+
+  // 处理命令执行
+  yargsInstance.middleware(async (argv) => {
+    const command = argv._[0] as string;
+    if (!command) return;
+
+    const matchingCommands = findMatchingCommands(command);
+    
+    if (matchingCommands.length > 1) {
+      // 有冲突的命令，让用户选择
+      const selectedCommand = await handleCommandConflict(command, matchingCommands);
+      // 更新 argv 中的命令
+      argv._ = [selectedCommand, ...argv._.slice(1)];
     }
   });
 
-  const parser = yargs(hideBin(process.argv))
-    .scriptName('f')
-    .usage('$0 <command> [options]')
-    .middleware(async (argv: ArgumentsCamelCase<{}>) => {
-      // 如果使用了别名，检查是否有冲突
-      const command = argv._[0] as string;
-      if (command) {
-        const resolvedCommand = await resolveCommand(command);
-        if (resolvedCommand) {
-          // 更新命令名称
-          argv._ = [resolvedCommand.name, ...argv._.slice(1)];
-        }
-      }
-    })
-    .demandCommand(1, 'You need at least one command before moving on')
-    .recommendCommands()
-    .strict()
-    .help()
-    .alias('h', 'help')
-    .version()
-    .alias('v', 'version')
-    .example('f commit', 'Commit changes with AI message')
-    .example('f commit -v', 'Commit with verbose output')
-    .example('f push', 'Push changes to remote')
-    .example('f push -v', 'Push with verbose output')
-    .example('f g open', 'Open repository in browser (alias for git open)')
-    .example('f i', 'Show local IP addresses (alias for ip)')
-    .example('f t', 'Show current time (alias for time)')
-    .example('f time', 'Show current time')
-    .example('f time -w', 'Show auto-updating time (Ctrl+C to stop)')
-    .example('f t --watch', 'Another way to show auto-updating time')
-    .example('f c', 'Open in editor (alias for code)')
-    .example('f o', 'Open in editor (another alias for code)')
-    .example('f code', 'Open current directory in your preferred editor')
-    .example('f commit -v', 'Show diff when generating commit message')
-    .example('f push -v', 'Show diff when pushing changes')
-    .example('f chrome', 'Open Chrome browser')
-    .example('f chrome https://github.com', 'Open Chrome with URL')
-    .example('f ping github.com', 'Ping domain')
-    .example('f translate "Hello"', 'Translate text')
-    .example('f debug', 'Debug last command execution')
-    .example('f config', 'Configure settings')
-    .example('f help', 'Show help information')
-    .example('f nrm ls', 'List npm registries')
-    .example('f ncu', 'Check package updates');
-
   // 注册所有命令
   commands.forEach(cmd => {
-    parser.command(cmd);
+    const { command, describe, handler, builder, aliases = [] } = cmd;
+    yargsInstance.command(command, describe, builder || {}, handler);
+    if (aliases.length > 0) {
+      yargsInstance.alias(command.split(' ')[0], aliases);
+    }
   });
 
-  return parser;
+  yargsInstance
+    .help()
+    .alias('help', 'h')
+    .demandCommand(1, '')
+    .strict()
+    .parse();
+
+  return yargsInstance;
 }
