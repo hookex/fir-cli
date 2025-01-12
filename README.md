@@ -18,7 +18,7 @@ A modern CLI tool that enhances your development workflow with AI-powered featur
 ## Installation
 
 ```bash
-npm install -g fir-cli
+npm i fir-cli -g
 ```
 
 ## Configuration (Optional)

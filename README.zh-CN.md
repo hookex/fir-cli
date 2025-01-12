@@ -18,7 +18,7 @@
 ## 安装
 
 ```bash
-npm install -g fir-cli
+npm i fir-cli -g
 ```
 
 ## 配置（可选）

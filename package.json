@@ -1,7 +1,7 @@
 {
   "name": "fir-cli",
-  "version": "1.0.18",
-  "description": "A command line tool for daily development",
+  "version": "1.0.20",
+  "description": "A powerful command line tool for daily development, featuring Git operations, code statistics, time management, and AI assistance",
   "type": "module",
   "main": "./dist/cli.js",
   "bin": {
@@ -28,18 +28,22 @@
     "ai",
     "productivity",
     "tools",
-    "typescript"
+    "typescript",
+    "development",
+    "code-statistics",
+    "time-management",
+    "multilingual"
   ],
   "author": "hooke",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hooke/fir-cli.git"
+    "url": "git+https://github.com/hookex/one-cli.git"
   },
   "bugs": {
-    "url": "https://github.com/hooke/fir-cli/issues"
+    "url": "https://github.com/hookex/one-cli/issues"
   },
-  "homepage": "https://github.com/hooke/fir-cli#readme",
+  "homepage": "https://github.com/hookex/one-cli#readme",
   "publishConfig": {
     "access": "public"
   },
