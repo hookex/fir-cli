@@ -12,36 +12,27 @@ npm install -g fir-cli
 
 ## Features
 
-- **AI-Powered Git Commits**: Automatically generate conventional commit messages
-- **Smart Editor Integration**: Open projects in VS Code or WebStorm
-- **Browser Commands**: Quick Chrome launcher with URL support
-- **NPM Tools**: Run global packages and check for updates
-- **Time Display**: Show current time with auto-update option
-
-## Usage
-
-```bash
-fir [command] [options]
-```
-
 ### Git Commands
+- `fir commit` or `fir c`: Commit changes with AI-generated commit messages
+  - Auto-detects and stages unstaged changes
+  - Generates meaningful commit messages using AI
+  - Supports manual commit messages
+  - Shows detailed status information
 
-```bash
-# Commit changes with AI-generated message
-fir commit
+- `fir push` or `fir p`: Push changes to remote
+  - Shows current changes and unpushed commits
+  - Auto-stages and commits changes
+  - Creates remote branch if needed
+  - Handles upstream branch setup
 
-# Commit with specific message
-fir commit "feat: add new feature"
+- `fir open`: Open repository in browser
+  - Supports both HTTPS and SSH remote URLs
+  - Opens in default browser
 
-# Commit and push with AI message
-fir push
-
-# Push with specific commit message
-fir push "feat: new feature"
-
-# Open repository in browser
-fir open
-```
+- `fir clean`: Clean working directory
+  - Shows detailed status before cleaning
+  - Resets staged changes
+  - Removes untracked files
 
 ### Editor Commands
 
@@ -85,11 +76,78 @@ fir time --watch
 fir t -w
 ```
 
+### AI Commands
+- `fir translate`: Translate code between languages
+  - Supports multiple programming languages
+  - Preserves code structure and logic
+  - Adds helpful comments
+
+- `fir debug`: Debug code with AI assistance
+  - Analyzes code and error messages
+  - Provides detailed explanations
+  - Suggests fixes
+
 ## Configuration
+
+Create a `.firrc` file in your home directory with the following content:
+
+```json
+{
+  "openai": {
+    "apiKey": "your-api-key",
+    "apiBaseUrl": "your-api-base-url",
+    "apiModel": "your-api-model"
+  }
+}
+```
 
 ### Environment Variables
 
+You can also configure the CLI using environment variables:
+
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `OPENAI_API_BASE_URL`: Custom API base URL (optional)
+- `OPENAI_API_MODEL`: Custom API model (optional)
 - `ARK_API_KEY`: API key for AI commit message generation (optional)
+
+## Usage
+
+1. Initialize Git repository:
+   ```bash
+   git init
+   ```
+
+2. Make some changes to your code
+
+3. Commit changes with AI:
+   ```bash
+   fir commit
+   ```
+
+4. Push changes to remote:
+   ```bash
+   fir push
+   ```
+
+5. Open repository in browser:
+   ```bash
+   fir open
+   ```
+
+6. Clean working directory:
+   ```bash
+   fir clean
+   ```
+
+7. Translate code:
+   ```bash
+   fir translate
+   ```
+
+8. Debug code:
+   ```bash
+   fir debug
+   ```
 
 ## Development
 
@@ -110,10 +168,3 @@ fir t -w
 ## License
 
 MIT
-
-
-
-
-
-
-
