@@ -2,13 +2,17 @@
 
 A modern CLI tool that enhances your development workflow with AI-powered features.
 
+[English](./README.md) | [简体中文](./README.zh-CN.md)
+
 ## Installation
 
 ```bash
 npm install -g fir-cli
 ```
 
-## Configuration
+## Configuration (Optional)
+
+The CLI works out of the box for basic Git operations. For AI-powered features, you'll need to configure OpenAI API access.
 
 Create a `.firrc` file in your home directory:
 
@@ -16,17 +20,71 @@ Create a `.firrc` file in your home directory:
 {
   "openai": {
     "apiKey": "your-api-key",
-    "apiBaseUrl": "your-api-base-url",
-    "apiModel": "your-api-model"
+    "apiBaseUrl": "your-api-base-url",  // Optional
+    "apiModel": "your-api-model"        // Optional
   }
 }
 ```
 
-You can also configure using environment variables:
+Or use environment variables:
 
-- `OPENAI_API_KEY`: Your OpenAI API key
+- `OPENAI_API_KEY`: Your OpenAI API key (required for AI features)
 - `OPENAI_API_BASE_URL`: Custom API base URL (optional)
 - `OPENAI_API_MODEL`: Custom API model (optional)
+
+## Quick Start
+
+1. Initialize Git repository:
+   ```bash
+   git init
+   ```
+
+2. Make some changes to your code
+
+3. Commit with AI-generated message:
+   ```bash
+   f commit
+   ```
+
+4. Push to remote:
+   ```bash
+   f push
+   ```
+
+## Command Reference
+
+| Command | Alias | Description | Example |
+|---------|-------|-------------|---------|
+| Git Commands |
+| `f commit` | `f c` | Commit changes with AI message | `f commit` |
+| `f commit -v` | `f c -v` | Commit with verbose mode | `f c -v` |
+| `f push` | `f p` | Push changes to remote | `f push` |
+| `f push -v` | `f p -v` | Push with verbose mode | `f p -v` |
+| `f open` | - | Open repository in browser | `f open` |
+| `f clean` | - | Clean working directory | `f clean` |
+| `f git` | `f g` | Git operations | `f git open` |
+| Editor Commands |
+| `f code` | `f c`, `f o` | Open in VS Code | `f code` |
+| `f webstorm` | - | Open in WebStorm | `f webstorm` |
+| Browser Commands |
+| `f chrome` | - | Open Chrome | `f chrome` |
+| `f chrome <url>` | - | Open Chrome with URL | `f chrome https://github.com` |
+| Network Commands |
+| `f ip` | `f i` | Show local IP addresses | `f ip` |
+| `f ping` | - | Ping domain(s) | `f ping github.com` |
+| NPM Commands |
+| `f nrm` | - | Run NRM package | `f nrm ls` |
+| `f ncu` | - | Check package updates | `f ncu` |
+| Time Commands |
+| `f time` | `f t` | Show current time | `f time` |
+| `f time --watch` | `f t -w` | Show auto-updating time | `f time --watch` |
+| AI Commands |
+| `f translate` | `f t` | Translate text between languages | `f translate "Hello"` |
+| `f debug` | `f d` | Debug code with AI assistance | `f debug` |
+| `f ai` | - | Chat with AI assistant | `f ai "How to use git?"` |
+| Other Commands |
+| `f config` | - | Configure CLI settings | `f config set openai.apiKey "your-key"` |
+| `f help` | - | Show help information | `f help commit` |
 
 ## Features
 
@@ -191,45 +249,6 @@ Prevention:
 - Use optional chaining and nullish coalescing
 - Add type checking
 ```
-
-## Usage
-
-1. Initialize Git repository:
-   ```bash
-   git init
-   ```
-
-2. Make some changes to your code
-
-3. Commit changes with AI:
-   ```bash
-   f commit
-   ```
-
-4. Push changes to remote:
-   ```bash
-   f push
-   ```
-
-5. Open repository in browser:
-   ```bash
-   f open
-   ```
-
-6. Clean working directory:
-   ```bash
-   f clean
-   ```
-
-7. Translate code:
-   ```bash
-   f translate
-   ```
-
-8. Debug code:
-   ```bash
-   f debug
-   ```
 
 ## Development
 

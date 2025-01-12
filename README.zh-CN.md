@@ -10,7 +10,9 @@
 npm install -g fir-cli
 ```
 
-## 配置
+## 配置（可选）
+
+CLI 工具可以直接使用基本的 Git 操作。如果需要使用 AI 功能，你需要配置 OpenAI API 访问。
 
 在你的主目录中创建 `.firrc` 文件：
 
@@ -18,15 +20,15 @@ npm install -g fir-cli
 {
   "openai": {
     "apiKey": "你的-api-密钥",
-    "apiBaseUrl": "你的-api-基础-url",
-    "apiModel": "你的-api-模型"
+    "apiBaseUrl": "你的-api-基础-url",  // 可选
+    "apiModel": "你的-api-模型"        // 可选
   }
 }
 ```
 
-你也可以使用环境变量进行配置：
+或者使用环境变量：
 
-- `OPENAI_API_KEY`：你的 OpenAI API 密钥
+- `OPENAI_API_KEY`：你的 OpenAI API 密钥（AI 功能需要）
 - `OPENAI_API_BASE_URL`：自定义 API 基础 URL（可选）
 - `OPENAI_API_MODEL`：自定义 API 模型（可选）
 
@@ -48,6 +50,40 @@ npm install -g fir-cli
    ```bash
    f push
    ```
+
+## 命令参考
+
+| 命令 | 别名 | 描述 | 示例 |
+|------|------|------|------|
+| Git 命令 |
+| `f commit` | `f c` | 使用 AI 消息提交更改 | `f commit` |
+| `f commit -v` | `f c -v` | 使用详细模式提交 | `f c -v` |
+| `f push` | `f p` | 推送更改到远程 | `f push` |
+| `f push -v` | `f p -v` | 使用详细模式推送 | `f p -v` |
+| `f open` | - | 在浏览器中打开仓库 | `f open` |
+| `f clean` | - | 清理工作目录 | `f clean` |
+| `f git` | `f g` | Git 操作 | `f git open` |
+| 编辑器命令 |
+| `f code` | `f c`, `f o` | 在 VS Code 中打开 | `f code` |
+| 浏览器命令 |
+| `f chrome` | - | 打开 Chrome | `f chrome` |
+| `f chrome <url>` | - | 使用 URL 打开 Chrome | `f chrome https://github.com` |
+| 网络命令 |
+| `f ip` | `f i` | 显示本地 IP 地址 | `f ip` |
+| `f ping` | - | Ping 域名 | `f ping github.com` |
+| NPM 命令 |
+| `f nrm` | - | 运行 NRM 包 | `f nrm ls` |
+| `f ncu` | - | 检查包更新 | `f ncu` |
+| 时间命令 |
+| `f time` | `f t` | 显示当前时间 | `f time` |
+| `f time --watch` | `f t -w` | 显示自动更新的时间 | `f time --watch` |
+| AI 命令 |
+| `f translate` | `f t` | 在中英文之间翻译文本 | `f translate "你好"` |
+| `f debug` | `f d` | 使用 AI 辅助调试代码 | `f debug` |
+| `f ai` | - | 与 AI 助手对话 | `f ai "如何使用 git？"` |
+| 其他命令 |
+| `f config` | - | 配置 CLI 设置 | `f config set openai.apiKey "你的密钥"` |
+| `f help` | - | 显示帮助信息 | `f help commit` |
 
 ## 功能特性
 
@@ -212,18 +248,6 @@ f debug
 - 使用可选链和空值合并
 - 添加类型检查
 ```
-
-## 命令参考
-
-### Git 命令
-- `f commit` (`f c`)：使用 AI 消息提交更改
-- `f push` (`f p`)：推送更改到远程
-- `f open`：在浏览器中打开仓库
-- `f clean`：清理工作目录
-
-### AI 命令
-- `f translate` (`f t`)：在不同语言之间翻译代码
-- `f debug` (`f d`)：使用 AI 辅助调试代码
 
 ## 开发
 
