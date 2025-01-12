@@ -3,6 +3,87 @@ import chalk from 'chalk';
 import { generateCommitMessage } from '../services/ai.js';
 import ora from 'ora';
 import inquirer from 'inquirer';
+import open from 'open';
+
+// Git 状态接口
+interface GitStatus {
+  hasChanges: boolean;
+  hasUnpushedCommits: boolean;
+  currentBranch: string;
+  unpushedCommits: string;
+  stagedChanges: string;
+  unstagedChanges: string;
+}
+
+// 获取 Git 状态
+function getGitStatus(): GitStatus {
+  try {
+    const status = execSync('git status --porcelain').toString();
+    const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+    const stagedChanges = execSync('git diff --cached --stat').toString();
+    const unstagedChanges = execSync('git diff --stat').toString();
+    
+    // 检查是否有未推送的提交
+    let hasUnpushedCommits = false;
+    let unpushedCommits = '';
+    try {
+      // 获取未推送的提交信息
+      unpushedCommits = execSync('git log @{u}..', { encoding: 'utf-8' }).trim();
+      hasUnpushedCommits = unpushedCommits.length > 0;
+    } catch (error) {
+      // 如果出错（比如没有上游分支），也认为有未推送的提交
+      hasUnpushedCommits = true;
+    }
+
+    return {
+      hasChanges: status.length > 0,
+      hasUnpushedCommits,
+      currentBranch,
+      unpushedCommits,
+      stagedChanges,
+      unstagedChanges
+    };
+  } catch (error) {
+    console.error(chalk.red('Error getting git status:'), error);
+    throw error;
+  }
+}
+
+// 显示 Git 状态
+function showGitStatus(): GitStatus {
+  const status = getGitStatus();
+  
+  // 如果既没有更改也没有未推送的提交，直接返回
+  if (!status.hasChanges && !status.hasUnpushedCommits) {
+    console.log(chalk.yellow('No changes or unpushed commits detected'));
+    return status;
+  }
+
+  console.log(chalk.cyan('\nGit Status:'));
+  console.log(chalk.gray('----------------------------------------'));
+  
+  // 显示未暂存和已暂存的更改
+  if (status.hasChanges) {
+    if (status.unstagedChanges) {
+      console.log('Unstaged changes:');
+      console.log(status.unstagedChanges);
+    }
+    
+    if (status.stagedChanges) {
+      console.log('Staged changes:');
+      console.log(status.stagedChanges);
+    }
+  }
+  
+  // 显示未推送的提交
+  if (status.hasUnpushedCommits) {
+    console.log(chalk.yellow('\nUnpushed commits:'));
+    console.log(status.unpushedCommits || '(new branch)');
+  }
+  
+  console.log(chalk.gray('----------------------------------------'));
+  return status;
+}
 
 // 获取未暂存的更改
 function getUnstagedChanges(): string[] {
@@ -13,38 +94,6 @@ function getUnstagedChanges(): string[] {
       .filter(Boolean);
   } catch (error) {
     return [];
-  }
-}
-
-// 显示 Git 状态
-function showGitStatus(): boolean {
-  try {
-    // 获取状态信息
-    const status = execSync('git status --porcelain').toString();
-    const diff = execSync('git diff --cached --stat').toString();
-    
-    if (!status && !diff) {
-      console.log(chalk.yellow('No changes detected'));
-      return false;
-    }
-
-    console.log(chalk.cyan('\nCurrent changes:'));
-    console.log(chalk.gray('----------------------------------------'));
-    
-    if (status) {
-      console.log(status);
-    }
-    
-    if (diff) {
-      console.log('\nStaged changes:');
-      console.log(diff);
-    }
-    
-    console.log(chalk.gray('----------------------------------------'));
-    return true;
-  } catch (error) {
-    console.error(chalk.red('Error getting git status:'), error);
-    return false;
   }
 }
 
@@ -74,7 +123,8 @@ export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
     }
 
     // 显示当前状态
-    if (!showGitStatus()) {
+    const status = showGitStatus();
+    if (!status.hasChanges) {
       return false;
     }
 
@@ -126,14 +176,19 @@ export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
 // 处理 push 命令
 export async function handleGitPush(verbose?: boolean) {
   try {
-    // 显示当前状态并检查是否有更改
-    if (!showGitStatus()) {
-      return;
+    // 显示当前状态并检查是否有更改或未推送的提交
+    const status = showGitStatus();
+    
+    // 如果有未提交的更改，先提交
+    if (status.hasChanges) {
+      const commitSuccess = await handleGitCommit(verbose);
+      if (!commitSuccess) {
+        return;
+      }
     }
 
-    // 执行 git commit
-    const commitSuccess = await handleGitCommit(verbose);
-    if (!commitSuccess) {
+    // 如果没有任何需要推送的内容，退出
+    if (!status.hasChanges && !status.hasUnpushedCommits) {
       return;
     }
 
@@ -150,16 +205,13 @@ export async function handleGitPush(verbose?: boolean) {
       return;
     }
     
-    // 获取当前分支
-    const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
-    
     // 检查是否有远程分支
-    const hasRemote = execSync(`git ls-remote --heads origin ${currentBranch}`).toString().trim();
+    const hasRemote = execSync(`git ls-remote --heads origin ${status.currentBranch}`).toString().trim();
     
     // 如果没有远程分支，创建并设置上游
     if (!hasRemote) {
-      console.log(chalk.yellow(`Remote branch '${currentBranch}' not found. Creating it...`));
-      execSync(`git push -u origin ${currentBranch}`, { stdio: 'inherit' });
+      console.log(chalk.yellow(`Remote branch '${status.currentBranch}' not found. Creating it...`));
+      execSync(`git push -u origin ${status.currentBranch}`, { stdio: 'inherit' });
     } else {
       // 如果有远程分支，直接推送
       execSync('git push', { stdio: 'inherit' });
@@ -183,20 +235,21 @@ export async function handleGitOpen(): Promise<void> {
       .replace(/\.git$/, '')
       .replace(/:([\w-]+\/[\w-]+)$/, '/$1');
     
-    console.log(`✓ Opened ${httpsUrl} in browser`);
+    console.log(`✓ Opening ${httpsUrl} in browser`);
     await open(httpsUrl);
   } catch (error: any) {
     console.error('Error:', error.message);
   }
 }
 
-interface GitStatus {
+// 处理 clean 命令
+interface GitCleanStatus {
   modified: string[];
   added: string[];
   untracked: string[];
 }
 
-function getGitStatus(): GitStatus {
+function getGitCleanStatus(): GitCleanStatus {
   const status = {
     modified: [] as string[],
     added: [] as string[],
@@ -228,7 +281,7 @@ function getGitStatus(): GitStatus {
   return status;
 }
 
-async function confirmClean(status: GitStatus) {
+async function confirmClean(status: GitCleanStatus) {
   const { modified, added, untracked } = status;
   const hasChanges = modified.length > 0 || added.length > 0 || untracked.length > 0;
 
@@ -261,7 +314,7 @@ export async function handleClean() {
   const spinner = ora('Checking git status...').start();
   
   try {
-    const status = getGitStatus();
+    const status = getGitCleanStatus();
     spinner.stop();
 
     if (await confirmClean(status)) {
