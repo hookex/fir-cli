@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
+import { t } from '../i18n/index.js';
 
 // 扩展 dayjs 功能
 dayjs.extend(utc);
@@ -21,8 +22,8 @@ export function showTime(autoUpdate: boolean = false): void {
 
   const displayTime = () => {
     const now = dayjs();
-    const bjTime = now.tz('Asia/Shanghai');
-    const utcTime = now.utc();
+    const bjTime = now.tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss Z');
+    const utcTime = now.utc().format('YYYY-MM-DD HH:mm:ss Z');
 
     // 如果是自动更新模式且不是第一次运行，先清除之前的输出
     if (autoUpdate && !isFirstRun) {
@@ -31,15 +32,15 @@ export function showTime(autoUpdate: boolean = false): void {
 
     // 输出时间信息
     if (isFirstRun) {
-      console.log(chalk.cyan('\nCurrent Time:'));
+      console.log(chalk.cyan('\n' + t('commands.time.title')));
     } else {
-      console.log(chalk.cyan('Current Time:'));
+      console.log(chalk.cyan(t('commands.time.title')));
     }
-    console.log(chalk.white(`  Beijing: ${bjTime.format('YYYY-MM-DD HH:mm:ss Z')}`));
-    console.log(chalk.white(`  UTC:     ${utcTime.format('YYYY-MM-DD HH:mm:ss Z')}`));
+    console.log(chalk.white(`  ${t('commands.time.beijing').padEnd(8)} ${bjTime}`));
+    console.log(chalk.white(`  ${t('commands.time.utc').padEnd(8)}     ${utcTime}`));
     
     if (autoUpdate) {
-      console.log(chalk.gray('  Press Ctrl+C to stop'));
+      console.log(chalk.gray(t('commands.time.press_ctrl_c')));
     }
 
     isFirstRun = false;
@@ -51,12 +52,11 @@ export function showTime(autoUpdate: boolean = false): void {
   // 如果启用自动更新，设置定时器
   if (autoUpdate) {
     intervalId = setInterval(displayTime, 1000);
-
-    // 设置清理函数
+    
+    // 监听 Ctrl+C 以停止自动更新
     process.on('SIGINT', () => {
       if (intervalId) {
         clearInterval(intervalId);
-        console.log(chalk.yellow('\nStopped time update'));
       }
       process.exit(0);
     });

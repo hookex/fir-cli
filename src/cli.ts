@@ -6,6 +6,7 @@ import axios from 'axios';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { t } from './i18n/index.js';
 
 process.env.NODE_NO_WARNINGS = '1';
 
@@ -43,7 +44,7 @@ function showWelcomeMessage() {
       })
     )
   );
-  console.log(chalk.yellow('Your command line companion\n'));
+  console.log(chalk.yellow(t('welcome.slogan') + '\n'));
 }
 
 // 检查版本更新
@@ -52,12 +53,12 @@ async function checkVersion() {
   const latestVersion = await getLatestVersion();
   
   if (latestVersion) {
-    console.log(chalk.gray(`Current version: v${currentVersion}`));
+    console.log(chalk.gray(t('welcome.version.current', { version: currentVersion })));
     if (latestVersion !== currentVersion) {
-      console.log(chalk.yellow(`Latest version: v${latestVersion}`));
-      console.log(chalk.green('\nRun "npm install -g fir-cli" to update\n'));
+      console.log(chalk.yellow(t('welcome.version.latest', { version: latestVersion })));
+      console.log(chalk.green('\n' + t('welcome.version.update') + '\n'));
     } else {
-      console.log(chalk.green('You are using the latest version\n'));
+      console.log(chalk.green(t('welcome.version.latest_version') + '\n'));
     }
   }
   return currentVersion;
@@ -82,7 +83,7 @@ async function main() {
     // 注册命令并解析参数
     await registerCommands(currentVersion, scriptName);
   } catch (error: any) {
-    console.error(chalk.red('Error:'), error.message);
+    console.error(chalk.red(t('common.error')), error.message);
     process.exit(1);
   }
 }
