@@ -5,7 +5,7 @@ import ora from 'ora';
 import inquirer from 'inquirer';
 
 // 处理 commit 命令
-export async function handleGitCommit(verbose?: boolean) {
+export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
   try {
     // 获取未暂存的更改
     function getUnstagedChanges(): string[] {
@@ -16,6 +16,38 @@ export async function handleGitCommit(verbose?: boolean) {
           .filter(Boolean);
       } catch (error) {
         return [];
+      }
+    }
+
+    // 显示 Git 状态
+    function showGitStatus() {
+      try {
+        // 获取状态信息
+        const status = execSync('git status --porcelain').toString();
+        const diff = execSync('git diff --cached --stat').toString();
+        
+        if (!status && !diff) {
+          console.log(chalk.yellow('No changes detected'));
+          return false;
+        }
+
+        console.log(chalk.cyan('\nCurrent changes:'));
+        console.log(chalk.gray('----------------------------------------'));
+        
+        if (status) {
+          console.log(status);
+        }
+        
+        if (diff) {
+          console.log('\nStaged changes:');
+          console.log(diff);
+        }
+        
+        console.log(chalk.gray('----------------------------------------'));
+        return true;
+      } catch (error) {
+        console.error(chalk.red('Error getting git status:'), error);
+        return false;
       }
     }
 
@@ -37,50 +69,116 @@ export async function handleGitCommit(verbose?: boolean) {
         console.log(chalk.green('✓ Changes staged'));
       } else {
         console.log(chalk.yellow('Please stage your changes manually before committing'));
-        return;
+        return false;
       }
     }
 
-    // 检查是否有暂存的更改
-    const status = execSync('git status --porcelain').toString();
-    if (!status) {
-      console.log(chalk.yellow('No changes to commit'));
-      return;
+    // 显示当前状态
+    if (!showGitStatus()) {
+      return false;
     }
 
-    // 显示暂存的更改
-    if (verbose) {
-      console.log(chalk.cyan('\nChanges to be committed:'));
-      console.log(chalk.gray('----------------------------------------'));
-      console.log(status);
-      console.log(chalk.gray('----------------------------------------\n'));
+    // 询问是否使用 AI 生成提交消息
+    const { useAI } = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'useAI',
+      message: 'Would you like to use AI to generate commit message?',
+      default: true
+    }]);
+
+    let message: string;
+    if (useAI) {
+      const spinner = ora('Generating commit message...').start();
+      try {
+        message = await generateCommitMessage(verbose);
+        spinner.stop();
+      } catch (error: any) {
+        spinner.fail('Failed to generate commit message');
+        console.error(chalk.red('Error:'), error.message);
+        return false;
+      }
+    } else {
+      const { manualMessage } = await inquirer.prompt([{
+        type: 'input',
+        name: 'manualMessage',
+        message: 'Enter commit message:',
+        validate: (input: string) => {
+          if (!input.trim()) {
+            return 'Commit message cannot be empty';
+          }
+          return true;
+        }
+      }]);
+      message = manualMessage;
     }
 
-    const spinner = ora('Generating commit message...').start();
-
-    try {
-      // 生成提交信息
-      const message = await generateCommitMessage(verbose);
-      spinner.stop();
-
-      // 执行 git commit
-      execSync(`git commit -m "${message}"`, { stdio: 'inherit' });
-
-    } catch (error: any) {
-      spinner.fail('Failed to generate commit message');
-      console.error(chalk.red('Error:'), error.message);
-    }
+    // 执行 git commit
+    execSync(`git commit -m "${message}"`, { stdio: 'inherit' });
+    console.log(chalk.green('✓ Changes committed successfully'));
+    return true;
 
   } catch (error: any) {
     console.error(chalk.red('Error:'), error.message);
+    return false;
   }
 }
 
 // 处理 push 命令
 export async function handleGitPush(verbose?: boolean) {
   try {
+    // 显示当前状态
+    function showGitStatus() {
+      try {
+        // 获取状态信息
+        const status = execSync('git status --porcelain').toString();
+        const diff = execSync('git diff --cached --stat').toString();
+        
+        if (!status && !diff) {
+          console.log(chalk.yellow('No changes detected'));
+          return false;
+        }
+
+        console.log(chalk.cyan('\nCurrent changes:'));
+        console.log(chalk.gray('----------------------------------------'));
+        
+        if (status) {
+          console.log(status);
+        }
+        
+        if (diff) {
+          console.log('\nStaged changes:');
+          console.log(diff);
+        }
+        
+        console.log(chalk.gray('----------------------------------------'));
+        return true;
+      } catch (error) {
+        console.error(chalk.red('Error getting git status:'), error);
+        return false;
+      }
+    }
+
+    // 显示当前状态
+    showGitStatus();
+
     // 执行 git commit
-    await handleGitCommit(verbose);
+    const commitSuccess = await handleGitCommit(verbose);
+    if (!commitSuccess) {
+      return;
+    }
+
+    // 询问是否推送
+    const { autoPush } = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'autoPush',
+      message: 'Would you like to push these changes?',
+      default: true
+    }]);
+
+    if (!autoPush) {
+      console.log(chalk.yellow('Push cancelled'));
+      return;
+    }
     
     // 获取当前分支
     const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
@@ -103,6 +201,7 @@ export async function handleGitPush(verbose?: boolean) {
   }
 }
 
+// 处理 open 命令
 export async function handleGitOpen(): Promise<void> {
   try {
     // 获取远程仓库 URL
