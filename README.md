@@ -1,95 +1,174 @@
 # fir-cli
 
-> Personal CLI tools collection written in TypeScript
-
-[English](./README.md) | [简体中文](./README.zh-CN.md)
-
-## Installation
-
-```bash
-npm install -g fir-cli
-```
+A modern CLI tool that enhances your development workflow with AI-powered features.
 
 ## Features
 
 ### Git Commands
-- `fir commit` or `fir c`: Commit changes with AI-generated commit messages
-  - Auto-detects and stages unstaged changes
-  - Generates meaningful commit messages using AI
-  - Supports manual commit messages
-  - Shows detailed status information
 
-- `fir push` or `fir p`: Push changes to remote
-  - Shows current changes and unpushed commits
-  - Auto-stages and commits changes
-  - Creates remote branch if needed
-  - Handles upstream branch setup
+#### Commit Changes (`f commit` or `f c`)
+Commit changes with AI-generated commit messages.
 
-- `fir open`: Open repository in browser
-  - Supports both HTTPS and SSH remote URLs
-  - Opens in default browser
+Features:
+- Auto-detects and stages unstaged changes
+- Generates meaningful commit messages using AI
+- Supports manual commit messages
+- Shows detailed status information
 
-- `fir clean`: Clean working directory
-  - Shows detailed status before cleaning
-  - Resets staged changes
-  - Removes untracked files
-
-### Editor Commands
-
+Example:
 ```bash
-# Open current directory in editor (VS Code or WebStorm)
-fir code
-fir c    # shorthand
-fir o    # another shorthand
+# Basic commit with AI message
+f commit
+
+# Commit with verbose mode (shows detailed changes)
+f c -v
+
+# Example AI-generated message:
+feat(auth): add OAuth2 authentication with Google provider
+- Implement OAuth2 flow for Google authentication
+- Add user profile synchronization
+- Update configuration for OAuth credentials
 ```
 
-### Browser Commands
+#### Push Changes (`f push` or `f p`)
+Push changes to remote repository.
 
+Features:
+- Shows current changes and unpushed commits
+- Auto-stages and commits changes
+- Creates remote branch if needed
+- Handles upstream branch setup
+
+Example:
 ```bash
-# Open Chrome
-fir chrome
+# Push with AI commit message
+f push
 
-# Open Chrome with specific URL
-fir chrome https://github.com
+# Push with verbose mode
+f p -v
+
+# Status output example:
+Git Status:
+----------------------------------------
+Branch: feature/auth
+Last Commit: a1b2c3d - feat: add login page
+
+Changed Files:
+  Modified: src/auth/login.ts
+  Added: src/components/LoginForm.tsx
+  
+Unpushed commits:
+a1b2c3d feat: add login page
+b2c3d4e fix: handle auth errors
+----------------------------------------
 ```
 
-### NPM Commands
+#### Open Repository (`f open`)
+Open repository in browser.
 
+Features:
+- Supports both HTTPS and SSH remote URLs
+- Opens in default browser
+- Handles GitHub, GitLab, and Bitbucket URLs
+
+Example:
 ```bash
-# Install and run global package
-fir nrm
-fir nrm ls
+# Open current repository
+f open
 
-# Check for package updates
-fir ncu
+# Output example:
+✓ Opening https://github.com/username/repo in browser
 ```
 
-### Time Commands
+#### Clean Working Directory (`f clean`)
+Clean working directory and remove untracked files.
 
+Features:
+- Shows detailed status before cleaning
+- Resets staged changes
+- Removes untracked files
+- Interactive confirmation
+
+Example:
 ```bash
-# Show current time
-fir time
-fir t
+# Clean working directory
+f clean
 
-# Show auto-updating time
-fir time --watch
-fir t -w
+# Output example:
+Found changes:
+
+Modified files:
+  src/components/Button.tsx
+  src/styles/main.css
+
+Untracked files:
+  .env.local
+  temp/
 ```
 
 ### AI Commands
-- `fir translate`: Translate code between languages
-  - Supports multiple programming languages
-  - Preserves code structure and logic
-  - Adds helpful comments
 
-- `fir debug`: Debug code with AI assistance
-  - Analyzes code and error messages
-  - Provides detailed explanations
-  - Suggests fixes
+#### Translate Code (`f translate` or `f t`)
+Translate code between programming languages.
+
+Features:
+- Supports multiple programming languages
+- Preserves code structure and logic
+- Adds helpful comments
+- Handles language-specific idioms
+
+Example:
+```bash
+# Translate current file
+f translate python typescript
+
+# Example output:
+# Python input:
+def calculate_total(items):
+    return sum(item.price for item in items)
+
+# TypeScript output:
+function calculateTotal(items: Item[]): number {
+    return items.reduce((sum, item) => sum + item.price, 0);
+}
+```
+
+#### Debug Code (`f debug` or `f d`)
+Debug code with AI assistance.
+
+Features:
+- Analyzes code and error messages
+- Provides detailed explanations
+- Suggests fixes
+- Shows examples
+
+Example:
+```bash
+# Debug last error
+f debug
+
+# Example output:
+Error Analysis:
+- TypeError: Cannot read property 'data' of undefined
+- Location: src/api/users.ts:45
+- Root cause: API response is undefined before access
+
+Solution:
+1. Add null check before accessing data:
+   ```typescript
+   const response = await api.get('/users');
+   const data = response?.data ?? [];
+   ```
+
+Prevention:
+- Always handle undefined/null cases
+- Use optional chaining and nullish coalescing
+- Add type checking
+```
 
 ## Configuration
 
-Create a `.firrc` file in your home directory with the following content:
+Create a `.firrc` file in your home directory:
 
 ```json
 {
@@ -101,14 +180,19 @@ Create a `.firrc` file in your home directory with the following content:
 }
 ```
 
-### Environment Variables
+## Environment Variables
 
-You can also configure the CLI using environment variables:
+Configure the CLI using environment variables:
 
 - `OPENAI_API_KEY`: Your OpenAI API key
 - `OPENAI_API_BASE_URL`: Custom API base URL (optional)
 - `OPENAI_API_MODEL`: Custom API model (optional)
-- `ARK_API_KEY`: API key for AI commit message generation (optional)
+
+## Installation
+
+```bash
+npm install -g fir-cli
+```
 
 ## Usage
 
@@ -121,32 +205,32 @@ You can also configure the CLI using environment variables:
 
 3. Commit changes with AI:
    ```bash
-   fir commit
+   f commit
    ```
 
 4. Push changes to remote:
    ```bash
-   fir push
+   f push
    ```
 
 5. Open repository in browser:
    ```bash
-   fir open
+   f open
    ```
 
 6. Clean working directory:
    ```bash
-   fir clean
+   f clean
    ```
 
 7. Translate code:
    ```bash
-   fir translate
+   f translate
    ```
 
 8. Debug code:
    ```bash
-   fir debug
+   f debug
    ```
 
 ## Development
@@ -160,9 +244,9 @@ You can also configure the CLI using environment variables:
    ```bash
    npm run build
    ```
-4. Install globally for testing:
+4. Link for local development:
    ```bash
-   npm install -g --force
+   npm link
    ```
 
 ## License
