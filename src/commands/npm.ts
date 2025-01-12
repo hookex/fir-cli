@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import chalk from 'chalk';
+import { searchNpmPackages } from '../services/npm.js';
 
 export async function installAndRunGlobalPackage(packageName: string, args: string[] = []): Promise<void> {
   try {
@@ -9,6 +10,29 @@ export async function installAndRunGlobalPackage(packageName: string, args: stri
       execSync(`which ${packageName}`, { stdio: 'ignore' });
       isInstalled = true;
     } catch {
+      // 命令不存在，先尝试搜索 npm
+      console.log(chalk.yellow(`Command '${packageName}' not found. Searching npm...`));
+      
+      const packages = await searchNpmPackages(packageName);
+      if (packages.length === 0) {
+        console.log(chalk.red('No matching packages found.'));
+        return;
+      }
+
+      // 显示搜索结果
+      console.log(chalk.cyan('\nFound similar packages:'));
+      packages.forEach((pkg, index) => {
+        console.log(chalk.white(`${index + 1}. ${pkg.name} - ${pkg.description}`));
+        console.log(chalk.gray(`   Downloads: ${pkg.downloads} | Version: ${pkg.version}`));
+      });
+
+      // 提示用户选择
+      console.log(chalk.cyan('\nTo install a package, run:'));
+      console.log(chalk.white(`npm install -g <package-name>`));
+      return;
+    }
+
+    if (!isInstalled) {
       // 命令不存在，进行安装
       console.log(chalk.yellow(`${packageName} not found. Installing...`));
       
@@ -51,5 +75,14 @@ export async function installAndRunGlobalPackage(packageName: string, args: stri
     // 显示使用帮助
     console.log(chalk.yellow('\nTry running with --help to see available commands:'));
     console.log(chalk.cyan(`  ${packageName} --help`));
+  }
+}
+
+function commandExists(command: string): boolean {
+  try {
+    execSync(`which ${command}`, { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
   }
 }
