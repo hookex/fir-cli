@@ -12,33 +12,50 @@ interface CommandHistory {
 function getLastCommand(): CommandHistory | null {
   try {
     // 获取最后一条命令的历史记录
-    const historyCommand = process.platform === 'darwin' ? 
-      'tail -2 ~/.zsh_history' : 
-      'tail -2 ~/.bash_history';
+    // macOS 下使用 fc 命令获取最后一条命令
+    const lastCommand = execSync('fc -ln -1', { 
+      encoding: 'utf-8',
+      shell: '/bin/zsh'
+    }).trim();
     
-    const lastCommand = execSync(historyCommand, { encoding: 'utf-8' }).trim();
+    if (!lastCommand || lastCommand.startsWith('f ')) {
+      // 如果是我们自己的命令，则获取倒数第二条
+      const secondLastCommand = execSync('fc -ln -2 | head -n 1', {
+        encoding: 'utf-8',
+        shell: '/bin/zsh'
+      }).trim();
+      
+      if (!secondLastCommand) {
+        return null;
+      }
+      
+      return executeCommand(secondLastCommand);
+    }
     
-    if (!lastCommand) {
-      return null;
-    }
-
-    // 尝试执行命令获取输出
-    try {
-      const output = execSync(lastCommand, { encoding: 'utf-8' });
-      return {
-        command: lastCommand,
-        output,
-        exitCode: 0
-      };
-    } catch (error: any) {
-      return {
-        command: lastCommand,
-        output: error.message,
-        exitCode: error.status || 1
-      };
-    }
+    return executeCommand(lastCommand);
   } catch (error) {
+    console.error(chalk.red('Error getting command history:'), error);
     return null;
+  }
+}
+
+function executeCommand(command: string): CommandHistory {
+  try {
+    const output = execSync(command, { 
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+    return {
+      command,
+      output: output.trim(),
+      exitCode: 0
+    };
+  } catch (error: any) {
+    return {
+      command,
+      output: error.message,
+      exitCode: error.status || 1
+    };
   }
 }
 
