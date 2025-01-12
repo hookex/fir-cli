@@ -70,7 +70,8 @@ function findMatchingCommands(input: string): string[] {
   commands.forEach(cmd => {
     const { command, aliases = [] } = cmd;
     const mainCommand = command.split(' ')[0];
-    if (aliases.includes(input)) {
+    // 只处理别名匹配，完整命令交给 yargs 处理
+    if (mainCommand !== input && aliases.includes(input)) {
       matches.push(mainCommand);
     }
   });
