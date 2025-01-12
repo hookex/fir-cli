@@ -101,7 +101,17 @@ export default {
       desc: 'Clean git changes, restore modified files and remove untracked files'
     },
     debug: {
-      desc: 'Analyze last command execution'
+      desc: 'Analyze last command execution',
+      analyzing: 'Analyzing last command...',
+      analysis: 'Command Analysis',
+      commandInfo: 'Command Information',
+      baseCommand: 'Base Command',
+      arguments: 'Arguments',
+      processInfo: 'Process Information',
+      envInfo: 'Environment Information',
+      workingDir: 'Working Directory',
+      nodeVersion: 'Node Version',
+      platform: 'Platform'
     },
     statistics: {
       desc: 'Show code statistics by file extension',

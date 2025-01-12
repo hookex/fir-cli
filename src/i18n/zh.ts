@@ -101,7 +101,17 @@ export default {
       desc: '清理 git 更改，恢复修改的文件并删除未跟踪的文件'
     },
     debug: {
-      desc: '分析最后一次命令执行'
+      desc: '分析最后一次命令执行',
+      analyzing: '正在分析最后一次命令...',
+      analysis: '命令分析',
+      commandInfo: '命令信息',
+      baseCommand: '基础命令',
+      arguments: '参数',
+      processInfo: '进程信息',
+      envInfo: '环境信息',
+      workingDir: '工作目录',
+      nodeVersion: 'Node 版本',
+      platform: '平台'
     },
     statistics: {
       desc: '显示各类型文件的代码统计',
