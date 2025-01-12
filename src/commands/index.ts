@@ -7,6 +7,7 @@ import { showTime as handleTime } from './time.js';
 import { openInEditor as handleVSCode } from './vscode.js';
 import { installAndRunGlobalPackage as handleNpmCommand } from './npm.js';
 import { handlePing } from './ping.js';
+import { handleAI } from './ai.js';
 import chalk from 'chalk';
 
 interface CommitArgs {
@@ -225,7 +226,8 @@ export function registerCommands() {
     .example('f commit -v', 'Show diff when generating commit message')
     .example('f commit --verbose', 'Show diff when generating commit message')
     .example('f ping', 'Ping top 10 most visited domains')
-    .example('f ping github.com', 'Ping specific domain');
+    .example('f ping github.com', 'Ping specific domain')
+    .example('f ai', 'Configure AI settings');
 
   // 添加命令
   yargsInstance = yargsInstance
@@ -276,6 +278,11 @@ export function registerCommands() {
       command: 'ping [domain]',
       describe: 'Ping domain(s) to test network latency',
       handler: (argv: ArgumentsCamelCase<PingArgs>) => handlePing(argv.domain)
+    })
+    .command({
+      command: 'ai',
+      describe: 'Configure AI settings',
+      handler: handleAI
     })
     .command({
       command: 'commit [message]',

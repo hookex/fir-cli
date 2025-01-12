@@ -3,8 +3,9 @@ import chalk from 'chalk';
 import open from 'open';
 import { generateCommitMessage } from '../services/ai.js';
 import inquirer from 'inquirer';
+import { getConfig } from '../config/ai.js';
 
-export async function handleGitCommit(message?: string, verbose: boolean = false): Promise<void> {
+export async function handleGitCommit(message?: string, verbose?: boolean): Promise<void> {
   try {
     // 检查是否有暂存的更改
     const stagedChanges = execSync('git diff --cached --name-only').toString().trim();
@@ -25,9 +26,19 @@ export async function handleGitCommit(message?: string, verbose: boolean = false
 
     // 如果没有提供消息，使用 AI 生成
     if (!commitMessage) {
+      console.log('Generating commit message...');
+      
+      const config = getConfig();
+      const language = config.useChinese ? 'zh' : 'en';
+      
+      console.log('API Configuration:');
+      console.log(`- Base URL: ${process.env.API_BASE_URL || 'https://ark.cn-beijing.volces.com/api/v3'}`);
+      console.log(`- Model: ${process.env.API_MODEL || 'ep-20241217193710-knrhh'}`);
+      console.log(`- Language: ${language}`);
+
       try {
         // 生成 AI commit 信息
-        const generatedMessage = await generateCommitMessage(verbose);
+        const generatedMessage = await generateCommitMessage(verbose, language);
         
         // 让用户确认或编辑生成的信息
         const { action } = await inquirer.prompt([
@@ -87,7 +98,7 @@ export async function handleGitCommit(message?: string, verbose: boolean = false
   }
 }
 
-export async function handleGitPush(message?: string, verbose: boolean = false): Promise<void> {
+export async function handleGitPush(message?: string, verbose?: boolean): Promise<void> {
   try {
     // 如果没有提供消息，使用 AI 生成的 commit
     if (!message) {

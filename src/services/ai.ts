@@ -1,6 +1,7 @@
 import { config } from '../config/config.js';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
+import axios from 'axios';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
@@ -8,79 +9,50 @@ const openai = new OpenAI({
   baseURL: config.ai.baseURL,
 });
 
-export async function generateCommitMessage(verbose: boolean = false): Promise<string> {
+export async function generateCommitMessage(verbose: boolean = false, language: string = 'en'): Promise<string> {
   try {
     // 获取 git diff 信息
-    const diffOutput = execSync('git diff --cached').toString();
-    if (!diffOutput) {
-      throw new Error('No staged changes found. Please stage your changes first using git add');
-    }
-
+    let diffInfo = '';
     if (verbose) {
-      console.log(chalk.cyan('\nDiff information:'));
-      console.log(chalk.gray(diffOutput));
-      console.log(chalk.cyan('\nGenerating commit message...\n'));
-    } else {
-      console.log(chalk.cyan('Generating commit message...'));
+      diffInfo = execSync('git diff --cached').toString();
+      console.log(chalk.cyan('Changes to be committed:'));
+      console.log(chalk.gray(diffInfo));
     }
 
-    console.log(chalk.gray('API Configuration:'));
-    console.log(chalk.gray(`- Base URL: ${config.ai.baseURL}`));
-    console.log(chalk.gray(`- Model: ${config.ai.model}`));
-
-    // 构建提示信息
-    const systemPrompt = `You are a Git commit message generator. Generate a commit message following the Conventional Commits specification (https://www.conventionalcommits.org/).
-    Rules:
-    1. Use format: <type>(<scope>): <description>
-    2. Type must be one of: feat, fix, docs, style, refactor, test, chore
-    3. Scope is optional
-    4. Description should be concise and in present tense
-    5. Don't capitalize first letter
-    6. No period at the end
-    7. Maximum length: 100 characters`;
-
-    const userPrompt = `Based on the following git diff, generate a conventional commit message:
+    // 获取文件变更信息
+    const files = execSync('git diff --cached --name-only').toString().trim();
     
-    ${diffOutput}`;
+    // 准备提示信息
+    const prompt = language === 'zh'
+      ? `请根据以下 Git 变更生成一个符合 Conventional Commits 规范的提交信息：\n${files}${verbose ? `\n变更详情：\n${diffInfo}` : ''}`
+      : `Generate a Conventional Commits compliant message for these Git changes:\n${files}${verbose ? `\nChanges:\n${diffInfo}` : ''}`;
 
-    try {
-      // 调用 AI API
-      const completion = await openai.chat.completions.create({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        model: config.ai.model,
-      });
-
-      if (verbose) {
-        console.log(chalk.gray('API Response:'), completion);
-      }
-
-      const commitMessage = completion.choices[0]?.message?.content?.trim() || '';
-      
-      if (!commitMessage) {
-        throw new Error('API returned empty response');
-      }
-
-      // 验证 commit message 格式
-      if (!isValidCommitMessage(commitMessage)) {
-        if (verbose) {
-          console.log(chalk.yellow('Generated message:'), commitMessage);
+    // 调用 AI API
+    const response = await axios.post(config.ai.baseURL, {
+      model: config.ai.model,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
         }
-        throw new Error('Generated commit message does not follow conventional commits format');
-      }
+      ]
+    });
 
-      return commitMessage;
-    } catch (apiError: any) {
-      if (verbose) {
-        console.error(chalk.red('API Error:'), apiError);
-        if (apiError.response) {
-          console.error(chalk.red('API Response:'), apiError.response.data);
-        }
-      }
-      throw new Error(`AI API error: ${apiError.message}`);
+    const commitMessage = response.data.choices[0].message.content.trim();
+    
+    if (!commitMessage) {
+      throw new Error('API returned empty response');
     }
+
+    // 验证 commit message 格式
+    if (!isValidCommitMessage(commitMessage)) {
+      if (verbose) {
+        console.log(chalk.yellow('Generated message:'), commitMessage);
+      }
+      throw new Error('Generated commit message does not follow conventional commits format');
+    }
+
+    return commitMessage;
   } catch (error: any) {
     console.error(chalk.red('Error generating commit message:'), error.message);
     throw error;
