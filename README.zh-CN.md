@@ -1,4 +1,4 @@
-# one-cli
+# fir-cli
 
 > 使用 TypeScript 编写的个人命令行工具集
 
@@ -7,7 +7,7 @@
 ## 安装
 
 ```bash
-npm install -g @hooke/one
+npm install -g fir-cli
 ```
 
 ## 特性
@@ -21,68 +21,68 @@ npm install -g @hooke/one
 ## 使用方法
 
 ```bash
-one [命令] [选项]
+fir [命令] [选项]
 ```
 
 ### Git 命令
 
 ```bash
-# 使用 AI 生成的提交信息
-one commit
+# 使用 AI 生成的消息提交更改
+fir commit
 
-# 使用指定的提交信息
-one commit "feat: 添加新功能"
+# 使用指定消息提交
+fir commit "feat: 添加新功能"
 
-# 使用 AI 生成的信息提交并推送
-one push
+# 使用 AI 消息提交并推送
+fir push
 
-# 使用指定的信息提交并推送
-one push "feat: 新功能"
+# 使用指定消息推送
+fir push "feat: 新功能"
 
 # 在浏览器中打开仓库
-one open
+fir open
 ```
 
 ### 编辑器命令
 
 ```bash
 # 在编辑器中打开当前目录（VS Code 或 WebStorm）
-one code
-one c    # 简写
-one o    # 另一个简写
+fir code
+fir c    # 简写
+fir o    # 另一个简写
 ```
 
 ### 浏览器命令
 
 ```bash
 # 打开 Chrome
-one chrome
+fir chrome
 
 # 使用指定 URL 打开 Chrome
-one chrome https://github.com
+fir chrome https://github.com
 ```
 
 ### NPM 命令
 
 ```bash
 # 安装并运行全局包
-one nrm
-one nrm ls
+fir nrm
+fir nrm ls
 
 # 检查包更新
-one ncu
+fir ncu
 ```
 
 ### 时间命令
 
 ```bash
 # 显示当前时间
-one time
-one t
+fir time
+fir t
 
 # 显示自动更新的时间
-one time --watch
-one t -w
+fir time --watch
+fir t -w
 ```
 
 ## 配置

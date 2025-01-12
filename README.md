@@ -1,4 +1,4 @@
-# one-cli
+# fir-cli
 
 > Personal CLI tools collection written in TypeScript
 
@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-npm install -g @hooke/one
+npm install -g fir-cli
 ```
 
 ## Features
@@ -21,68 +21,68 @@ npm install -g @hooke/one
 ## Usage
 
 ```bash
-one [command] [options]
+fir [command] [options]
 ```
 
 ### Git Commands
 
 ```bash
 # Commit changes with AI-generated message
-one commit
+fir commit
 
 # Commit with specific message
-one commit "feat: add new feature"
+fir commit "feat: add new feature"
 
 # Commit and push with AI message
-one push
+fir push
 
 # Push with specific commit message
-one push "feat: new feature"
+fir push "feat: new feature"
 
 # Open repository in browser
-one open
+fir open
 ```
 
 ### Editor Commands
 
 ```bash
 # Open current directory in editor (VS Code or WebStorm)
-one code
-one c    # shorthand
-one o    # another shorthand
+fir code
+fir c    # shorthand
+fir o    # another shorthand
 ```
 
 ### Browser Commands
 
 ```bash
 # Open Chrome
-one chrome
+fir chrome
 
 # Open Chrome with specific URL
-one chrome https://github.com
+fir chrome https://github.com
 ```
 
 ### NPM Commands
 
 ```bash
 # Install and run global package
-one nrm
-one nrm ls
+fir nrm
+fir nrm ls
 
 # Check for package updates
-one ncu
+fir ncu
 ```
 
 ### Time Commands
 
 ```bash
 # Show current time
-one time
-one t
+fir time
+fir t
 
 # Show auto-updating time
-one time --watch
-one t -w
+fir time --watch
+fir t -w
 ```
 
 ## Configuration

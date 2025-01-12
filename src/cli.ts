@@ -1,15 +1,17 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-deprecation
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { registerCommands } from './commands/index.js';
 import chalk from 'chalk';
 import figlet from 'figlet';
 
+process.env.NODE_NO_WARNINGS = '1';
+
 // 显示欢迎信息的函数
 function showWelcome() {
   console.log(
     chalk.cyan(
-      figlet.textSync('Only One CLI', {
+      figlet.textSync('Fir CLI', {
         font: 'Standard',
         horizontalLayout: 'default',
         verticalLayout: 'default'

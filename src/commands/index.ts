@@ -126,15 +126,21 @@ const commands: Array<CommandModule<{}, any>> = [
     command: 'commit [message]',
     describe: 'Commit changes with a message (uses AI if message is empty)',
     builder: (yargs: Argv) => {
-      return yargs.positional('message', {
-        type: 'string',
-        describe: 'Commit message (optional, will use AI if not provided)'
-      });
+      return yargs
+        .positional('message', {
+          type: 'string',
+          describe: 'Commit message (optional, will use AI if not provided)'
+        })
+        .option('verbose', {
+          alias: 'v',
+          type: 'boolean',
+          description: 'Show diff information when generating commit message'
+        });
     },
     handler: async (argv: any) => {
       try {
-        const args = argv as CommitArgs;
-        await handleGitCommit(args.message);
+        const args = argv as CommitArgs & { verbose?: boolean };
+        await handleGitCommit(args.message, args.verbose);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -183,22 +189,30 @@ export function registerCommands(yargs: Argv): Argv {
 
   // 添加示例
   return yargsInstance
-    .example('$0 chrome', 'Open Chrome browser')
-    .example('$0 chrome https://github.com', 'Open Chrome with specific URL')
-    .example('$0 nrm', 'Install and run nrm if not found')
-    .example('$0 nrm ls', 'Run nrm with arguments')
-    .example('$0 commit', 'Commit changes with AI-generated message')
-    .example('$0 commit "feat: update readme"', 'Commit with specific message')
-    .example('$0 push', 'Commit with AI-generated message and push')
-    .example('$0 p', 'Shorthand for push with AI commit')
-    .example('$0 push "feat: add feature"', 'Push with specific commit message')
-    .example('$0 g open', 'Open repository in browser (alias for git open)')
-    .example('$0 i', 'Show local IP addresses (alias for ip)')
-    .example('$0 t', 'Show current time (alias for time)')
-    .example('$0 time', 'Show current time')
-    .example('$0 time -w', 'Show auto-updating time (Ctrl+C to stop)')
-    .example('$0 t --watch', 'Another way to show auto-updating time')
-    .example('$0 c', 'Open in editor (alias for code)')
-    .example('$0 o', 'Open in editor (another alias for code)')
-    .example('$0 code', 'Open current directory in your preferred editor');
+    .example('fir chrome', 'Open Chrome browser')
+    .example('fir chrome https://github.com', 'Open Chrome with specific URL')
+    .example('fir nrm', 'Install and run nrm if not found')
+    .example('fir nrm ls', 'Run nrm with arguments')
+    .example('fir commit', 'Commit changes with AI-generated message')
+    .example('fir commit "feat: update readme"', 'Commit with specific message')
+    .example('fir push', 'Commit with AI-generated message and push')
+    .example('fir p', 'Shorthand for push with AI commit')
+    .example('fir push "feat: add feature"', 'Push with specific commit message')
+    .example('fir g open', 'Open repository in browser (alias for git open)')
+    .example('fir i', 'Show local IP addresses (alias for ip)')
+    .example('fir t', 'Show current time (alias for time)')
+    .example('fir time', 'Show current time')
+    .example('fir time -w', 'Show auto-updating time (Ctrl+C to stop)')
+    .example('fir t --watch', 'Another way to show auto-updating time')
+    .example('fir c', 'Open in editor (alias for code)')
+    .example('fir o', 'Open in editor (another alias for code)')
+    .example('fir code', 'Open current directory in your preferred editor')
+    .example('fir commit -v', 'Show diff when generating commit message')
+    .example('fir commit --verbose', 'Show diff when generating commit message')
+    .usage('fir <command> [options]')
+    .demandCommand(1, 'Not enough non-option arguments: got 0, need at least 1')
+    .help()
+    .alias('h', 'help')
+    .version()
+    .alias('v', 'version');
 }

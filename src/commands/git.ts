@@ -4,7 +4,7 @@ import open from 'open';
 import { generateCommitMessage } from '../services/ai.js';
 import inquirer from 'inquirer';
 
-export async function handleGitCommit(message?: string): Promise<void> {
+export async function handleGitCommit(message?: string, verbose: boolean = false): Promise<void> {
   try {
     // 检查是否有暂存的更改
     const stagedChanges = execSync('git diff --cached --name-only').toString().trim();
@@ -27,7 +27,7 @@ export async function handleGitCommit(message?: string): Promise<void> {
     if (!commitMessage) {
       try {
         // 生成 AI commit 信息
-        const generatedMessage = await generateCommitMessage();
+        const generatedMessage = await generateCommitMessage(verbose);
         
         // 让用户确认或编辑生成的信息
         const { action } = await inquirer.prompt([
@@ -87,13 +87,13 @@ export async function handleGitCommit(message?: string): Promise<void> {
   }
 }
 
-export async function handleGitPush(message?: string): Promise<void> {
+export async function handleGitPush(message?: string, verbose: boolean = false): Promise<void> {
   try {
     // 如果没有提供消息，使用 AI 生成的 commit
     if (!message) {
-      await handleGitCommit();
+      await handleGitCommit(undefined, verbose);
     } else {
-      await handleGitCommit(message);
+      await handleGitCommit(message, verbose);
     }
     
     // 获取当前分支
