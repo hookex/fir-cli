@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./dist/cli.js",
   "bin": {
-    "fir": "./dist/cli.js"
+    "fir": "./dist/cli.js",
+    "f": "./dist/cli.js"
   },
   "engines": {
     "node": ">=16"

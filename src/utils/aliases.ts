@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, appendFileSync } from 'fs';
 import path from 'path';
 import os from 'os';
 
@@ -16,22 +16,23 @@ export function createAliases(binPath: string): void {
       console.log('Created directory:', userBinDir);
     }
 
-    // 创建别名
-    if (!existsSync(fPath)) {
-      execSync(`ln -s "${absoluteBinPath}" "${fPath}"`);
-      console.log('Created alias:', fPath, '->', absoluteBinPath);
+    // 创建别名脚本
+    const scriptContent = `#!/bin/bash
+"${absoluteBinPath}" "$@"`;
+
+    writeFileSync(fPath, scriptContent, { mode: 0o755 });
+    console.log('Created alias:', fPath, '->', absoluteBinPath);
       
-      // 添加到 PATH（如果需要）
-      const rcFile = path.join(os.homedir(), '.zshrc');
-      const pathEntry = `\n# Add user's local bin directory to PATH\nexport PATH="$HOME/.local/bin:$PATH"\n`;
+    // 添加到 PATH（如果需要）
+    const rcFile = path.join(os.homedir(), '.zshrc');
+    const pathEntry = `\n# Add user's local bin directory to PATH\nexport PATH="$HOME/.local/bin:$PATH"\n`;
       
-      if (existsSync(rcFile)) {
-        const currentContent = require('fs').readFileSync(rcFile, 'utf8');
-        if (!currentContent.includes('.local/bin')) {
-          require('fs').appendFileSync(rcFile, pathEntry);
-          console.log('Added .local/bin to PATH in .zshrc');
-          console.log('Please run: source ~/.zshrc');
-        }
+    if (existsSync(rcFile)) {
+      const currentContent = readFileSync(rcFile, 'utf8');
+      if (!currentContent.includes('.local/bin')) {
+        appendFileSync(rcFile, pathEntry);
+        console.log('Added .local/bin to PATH in .zshrc');
+        console.log('Please run: source ~/.zshrc');
       }
     }
   } catch (error) {

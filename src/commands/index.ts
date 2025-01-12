@@ -189,6 +189,7 @@ const commands: Array<any> = [
 export function registerCommands() {
   let yargsInstance = yargs(hideBin(process.argv))
     .scriptName('fir')
+    .alias('$0', 'f')
     .usage('$0 <command> [options]');
 
   // 注册每个命令
