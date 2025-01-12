@@ -56,34 +56,35 @@ Or use environment variables:
 | Command | Alias | Description | Example |
 |---------|-------|-------------|---------|
 | Git Commands |
-| `f commit` | `f c` | Commit changes with AI message | `f commit` |
-| `f commit -v` | `f c -v` | Commit with verbose mode | `f c -v` |
-| `f push` | `f p` | Push changes to remote | `f push` |
-| `f push -v` | `f p -v` | Push with verbose mode | `f p -v` |
+| `f commit` | `f c`, `f co`, `f com` | Commit changes with AI message | `f commit` |
+| `f commit -v` | `f c -v`, `f co -v`, `f com -v` | Commit with verbose mode | `f c -v` |
+| `f push` | `f p`, `f pu` | Push changes to remote | `f push` |
+| `f push -v` | `f p -v`, `f pu -v` | Push with verbose mode | `f p -v` |
 | `f open` | - | Open repository in browser | `f open` |
-| `f clean` | - | Clean working directory | `f clean` |
-| `f git` | `f g` | Git operations | `f git open` |
+| `f clean` | `f c`, `f cl` | Clean working directory | `f clean` |
+| `f git` | `f g`, `f gi` | Git operations | `f git open` |
 | Editor Commands |
-| `f code` | `f e`, `f o` | Open in VS Code | `f code` |
+| `f code` | `f c`, `f co` | Open in VS Code | `f code` |
 | `f webstorm` | - | Open in WebStorm | `f webstorm` |
 | Browser Commands |
-| `f chrome` | - | Open Chrome | `f chrome` |
-| `f chrome <url>` | - | Open Chrome with URL | `f chrome https://github.com` |
+| `f chrome` | `f c`, `f ch` | Open Chrome | `f chrome` |
+| `f chrome <url>` | `f c <url>`, `f ch <url>` | Open Chrome with URL | `f chrome https://github.com` |
 | Network Commands |
-| `f ip` | `f i` | Show local IP addresses | `f ip` |
-| `f ping` | - | Ping domain(s) | `f ping github.com` |
+| `f ip` | `f i`, `f ip` | Show local IP addresses | `f ip` |
+| `f ping` | `f p`, `f pi` | Ping domain(s) | `f ping github.com` |
 | NPM Commands |
 | `f nrm` | - | Run NRM package | `f nrm ls` |
 | `f ncu` | - | Check package updates | `f ncu` |
+| `f install` | `f i`, `f in` | Run or install and run a global npm package | `f install nrm` |
 | Time Commands |
-| `f time` | `f tm` | Show current time | `f time` |
-| `f time --watch` | `f tm -w` | Show auto-updating time | `f time --watch` |
+| `f time` | `f t`, `f ti` | Show current time | `f time` |
+| `f time --watch` | `f t --watch`, `f ti -w` | Show auto-updating time | `f time --watch` |
 | AI Commands |
-| `f translate` | `f t` | Translate text between languages | `f translate "Hello"` |
-| `f debug` | `f d` | Debug code with AI assistance | `f debug` |
-| `f ai` | - | Chat with AI assistant | `f ai "How to use git?"` |
+| `f translate` | `f t`, `f tr` | Translate text between languages | `f translate "Hello"` |
+| `f debug` | `f d`, `f de` | Debug code with AI assistance | `f debug` |
+| `f ai` | `f a`, `f ai` | Chat with AI assistant | `f ai "How to use git?"` |
 | Other Commands |
-| `f config` | - | Configure CLI settings | `f config set openai.apiKey "your-key"` |
+| `f config` | `f c`, `f co` | Configure CLI settings | `f config set openai.apiKey "your-key"` |
 | `f help` | - | Show help information | `f help commit` |
 
 ## Features

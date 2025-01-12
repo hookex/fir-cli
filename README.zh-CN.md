@@ -56,33 +56,34 @@ CLI 工具可以直接使用基本的 Git 操作。如果需要使用 AI 功能�
 | 命令 | 别名 | 描述 | 示例 |
 |------|------|------|------|
 | Git 命令 |
-| `f commit` | `f c` | 使用 AI 消息提交更改 | `f commit` |
-| `f commit -v` | `f c -v` | 使用详细模式提交 | `f c -v` |
-| `f push` | `f p` | 推送更改到远程 | `f push` |
-| `f push -v` | `f p -v` | 使用详细模式推送 | `f p -v` |
+| `f commit` | `f c`, `f co`, `f com` | 使用 AI 消息提交更改 | `f commit` |
+| `f commit -v` | `f c -v`, `f co -v`, `f com -v` | 使用详细模式提交 | `f c -v` |
+| `f push` | `f p`, `f pu` | 推送更改到远程 | `f push` |
+| `f push -v` | `f p -v`, `f pu -v` | 使用详细模式推送 | `f p -v` |
 | `f open` | - | 在浏览器中打开仓库 | `f open` |
-| `f clean` | - | 清理工作目录 | `f clean` |
-| `f git` | `f g` | Git 操作 | `f git open` |
+| `f clean` | `f c`, `f cl` | 清理工作目录 | `f clean` |
+| `f git` | `f g`, `f gi` | Git 操作 | `f git open` |
 | 编辑器命令 |
-| `f code` | `f e`, `f o` | 在 VS Code 中打开 | `f code` |
+| `f code` | `f c`, `f co` | 在 VS Code 中打开 | `f code` |
 | 浏览器命令 |
-| `f chrome` | - | 打开 Chrome | `f chrome` |
-| `f chrome <url>` | - | 使用 URL 打开 Chrome | `f chrome https://github.com` |
+| `f chrome` | `f c`, `f ch` | 打开 Chrome | `f chrome` |
+| `f chrome <url>` | `f c <url>`, `f ch <url>` | 使用 URL 打开 Chrome | `f chrome https://github.com` |
 | 网络命令 |
-| `f ip` | `f i` | 显示本地 IP 地址 | `f ip` |
-| `f ping` | - | Ping 域名 | `f ping github.com` |
+| `f ip` | `f i`, `f ip` | 显示本地 IP 地址 | `f ip` |
+| `f ping` | `f p`, `f pi` | Ping 域名 | `f ping github.com` |
 | NPM 命令 |
 | `f nrm` | - | 运行 NRM 包 | `f nrm ls` |
 | `f ncu` | - | 检查包更新 | `f ncu` |
+| `f install` | `f i`, `f in` | 运行或安装并运行全局 npm 包 | `f install nrm` |
 | 时间命令 |
-| `f time` | `f tm` | 显示当前时间 | `f time` |
-| `f time --watch` | `f tm -w` | 显示自动更新的时间 | `f time --watch` |
+| `f time` | `f t`, `f ti` | 显示当前时间 | `f time` |
+| `f time --watch` | `f t --watch`, `f ti -w` | 显示自动更新的时间 | `f time --watch` |
 | AI 命令 |
-| `f translate` | `f t` | 在中英文之间翻译文本 | `f translate "你好"` |
-| `f debug` | `f d` | 使用 AI 辅助调试代码 | `f debug` |
-| `f ai` | - | 与 AI 助手对话 | `f ai "如何使用 git？"` |
+| `f translate` | `f t`, `f tr` | 在中英文之间翻译文本 | `f translate "你好"` |
+| `f debug` | `f d`, `f de` | 使用 AI 辅助调试代码 | `f debug` |
+| `f ai` | `f a`, `f ai` | 与 AI 助手对话 | `f ai "如何使用 git？"` |
 | 其他命令 |
-| `f config` | - | 配置 CLI 设置 | `f config set openai.apiKey "你的密钥"` |
+| `f config` | `f c`, `f co` | 配置 CLI 设置 | `f config set openai.apiKey "你的密钥"` |
 | `f help` | - | 显示帮助信息 | `f help commit` |
 
 ## 功能特性
