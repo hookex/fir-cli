@@ -2,22 +2,25 @@
 import figlet from 'figlet';
 import chalk from 'chalk';
 import { registerCommands } from './commands/index.js';
-import { createAliases } from './utils/aliases.js';
 
 process.env.NODE_NO_WARNINGS = '1';
 
-// 显示欢迎信息
-console.log(
-  chalk.cyan(
-    figlet.textSync('Fir CLI', {
-      font: 'Standard',
-      horizontalLayout: 'default',
-      verticalLayout: 'default'
-    })
-  )
-);
+// 只在特定命令时显示欢迎信息
+const args = process.argv.slice(2);
+const showLogo = args.length === 0 || args[0] === '--help' || args[0] === '-h';
 
-console.log(chalk.yellow('Your command line companion\n'));
+if (showLogo) {
+  console.log(
+    chalk.cyan(
+      figlet.textSync('Fir CLI', {
+        font: 'Standard',
+        horizontalLayout: 'default',
+        verticalLayout: 'default'
+      })
+    )
+  );
+  console.log(chalk.yellow('Your command line companion\n'));
+}
 
 // 注册命令
 registerCommands().parse();
