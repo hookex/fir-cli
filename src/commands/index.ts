@@ -174,15 +174,20 @@ const commands: Array<any> = [
         });
     },
     handler: async (argv: any) => {
-      // 检查是否是内部命令
-      const internalCommands = ['git', 'ip', 'time', 'code', 'commit', 'push', 'ping'];
-      if (internalCommands.includes(argv.command)) {
-        console.error(chalk.red(`Error: '${argv.command}' is an internal command. Use it directly without $0.`));
-        return;
-      }
-
+      const command = argv.command;
+      
       try {
-        await handleNpmCommand(argv.command, argv.args || []);
+        // 检查是否是内部命令或别名
+        const resolvedCommand = await resolveCommand(command);
+        if (resolvedCommand) {
+          // 如果是别名，使用原始命令
+          const args = argv.args || [];
+          argv._ = [resolvedCommand.name, ...args];
+          return;
+        }
+
+        // 如果不是内部命令或别名，尝试作为 npm 包运行
+        await handleNpmCommand(command, argv.args || []);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -236,7 +241,7 @@ export function registerCommands() {
   // 注册所有命令的别名
   commands.forEach(cmd => {
     if (cmd.aliases) {
-      cmd.aliases.forEach(alias => {
+      cmd.aliases.forEach((alias: string) => {
         registerAlias(alias, {
           name: cmd.command.split(' ')[0],
           description: cmd.describe,
@@ -249,17 +254,16 @@ export function registerCommands() {
   const parser = yargs(hideBin(process.argv))
     .scriptName('f')
     .usage('$0 <command> [options]')
-    .middleware(async (argv) => {
+    .middleware(async (argv: ArgumentsCamelCase<{}>) => {
       // 如果使用了别名，检查是否有冲突
-      const alias = argv._[0] as string;
-      if (alias) {
-        const resolvedCommand = await resolveCommand(alias);
+      const command = argv._[0] as string;
+      if (command) {
+        const resolvedCommand = await resolveCommand(command);
         if (resolvedCommand) {
           // 更新命令名称
           argv._ = [resolvedCommand.name, ...argv._.slice(1)];
         }
       }
-      return argv;
     })
     .demandCommand(1, 'You need at least one command before moving on')
     .recommendCommands()

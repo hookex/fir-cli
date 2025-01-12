@@ -8,6 +8,14 @@ interface Command {
 }
 
 const commandMap = new Map<string, Command[]>();
+const internalCommands = new Set([
+  'git', 'ip', 'time', 'code', 'commit', 'push', 'ping',
+  'chrome', 'translate', 'debug', 'ai', 'clean', 'config'
+]);
+
+export function isInternalCommand(command: string): boolean {
+  return internalCommands.has(command);
+}
 
 export function registerAlias(alias: string, command: Command) {
   const commands = commandMap.get(alias) || [];
@@ -20,6 +28,14 @@ export function clearAliases() {
 }
 
 export async function resolveCommand(alias: string): Promise<Command | null> {
+  // 如果是内部命令，直接返回
+  if (isInternalCommand(alias)) {
+    return {
+      name: alias,
+      description: `Internal command: ${alias}`
+    };
+  }
+
   const commands = commandMap.get(alias);
   
   if (!commands || commands.length === 0) {
