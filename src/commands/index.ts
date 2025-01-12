@@ -262,13 +262,13 @@ const commands: Array<any> = [
   }
 ];
 
-export async function registerCommands() {
+export async function registerCommands(version: string) {
   const yargsInstance = yargs(hideBin(process.argv))
     .scriptName('f')
     .usage('$0 <command> [options]')
     .help()
     .alias('help', 'h')
-    .version()
+    .version('version', 'Show version number', version)
     .alias('version', 'v')
     .demandCommand(0)
     .showHelpOnFail(true)
