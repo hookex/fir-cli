@@ -1,6 +1,8 @@
 # one-cli
 
-Personal CLI tools collection written in TypeScript and published to npm.
+> Personal CLI tools collection written in TypeScript
+
+[English](./README.md) | [简体中文](./README.zh-CN.md)
 
 ## Installation
 
@@ -8,15 +10,19 @@ Personal CLI tools collection written in TypeScript and published to npm.
 npm install -g @hooke/one
 ```
 
-## Usage
+## Features
 
-After installation, you can use the CLI with the `one` command:
+- **AI-Powered Git Commits**: Automatically generate conventional commit messages
+- **Smart Editor Integration**: Open projects in VS Code or WebStorm
+- **Browser Commands**: Quick Chrome launcher with URL support
+- **NPM Tools**: Run global packages and check for updates
+- **Time Display**: Show current time with auto-update option
+
+## Usage
 
 ```bash
 one [command] [options]
 ```
-
-## Available Commands
 
 ### Git Commands
 
@@ -27,10 +33,10 @@ one commit
 # Commit with specific message
 one commit "feat: add new feature"
 
-# Push changes
+# Commit and push with AI message
 one push
 
-# Push with new commit message
+# Push with specific commit message
 one push "feat: new feature"
 
 # Open repository in browser
@@ -79,13 +85,13 @@ one time --watch
 one t -w
 ```
 
-## Environment Variables
+## Configuration
+
+### Environment Variables
 
 - `ARK_API_KEY`: API key for AI commit message generation (optional)
 
 ## Development
-
-This project is built with TypeScript. To develop:
 
 1. Clone the repository
 2. Install dependencies:

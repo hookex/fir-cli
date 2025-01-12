@@ -36,13 +36,31 @@ const commands: Array<CommandModule<{}, any>> = [
     }
   },
   {
+    command: 'push [message]',
+    aliases: ['p'],
+    describe: 'Push changes with optional commit message (uses AI if message is empty)',
+    builder: (yargs: Argv) => {
+      return yargs.positional('message', {
+        type: 'string',
+        describe: 'Commit message (optional, will use AI if not provided)'
+      });
+    },
+    handler: async (argv: any) => {
+      try {
+        await handleGitPush(argv.message);
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
+  },
+  {
     command: 'git <action> [message]',
     describe: 'Git operations',
     aliases: ['g'],
     builder: (yargs: Argv) => {
       return yargs
         .positional('action', {
-          choices: ['push', 'open'] as const,
+          choices: ['open'] as const,
           describe: 'Git action to perform'
         })
         .positional('message', {
@@ -55,8 +73,6 @@ const commands: Array<CommandModule<{}, any>> = [
         const args = argv as GitArgs;
         if (args.action === 'open') {
           await handleGitOpen();
-        } else if (args.action === 'push') {
-          await handleGitPush(args.message);
         }
       } catch (error: any) {
         console.error("Error:", error.message);
@@ -141,7 +157,7 @@ const commands: Array<CommandModule<{}, any>> = [
     },
     handler: async (argv: any) => {
       // 检查是否是内部命令
-      const internalCommands = ['git', 'ip', 'time', 'code', 'commit'];
+      const internalCommands = ['git', 'ip', 'time', 'code', 'commit', 'push'];
       if (internalCommands.includes(argv.command)) {
         console.error(chalk.red(`Error: '${argv.command}' is an internal command. Use it directly without $0.`));
         return;
@@ -173,8 +189,9 @@ export function registerCommands(yargs: Argv): Argv {
     .example('$0 nrm ls', 'Run nrm with arguments')
     .example('$0 commit', 'Commit changes with AI-generated message')
     .example('$0 commit "feat: update readme"', 'Commit with specific message')
-    .example('$0 g push', 'Push changes using last commit message (alias for git)')
-    .example('$0 git push "feat: new feature"', 'Push changes with a new message')
+    .example('$0 push', 'Commit with AI-generated message and push')
+    .example('$0 p', 'Shorthand for push with AI commit')
+    .example('$0 push "feat: add feature"', 'Push with specific commit message')
     .example('$0 g open', 'Open repository in browser (alias for git open)')
     .example('$0 i', 'Show local IP addresses (alias for ip)')
     .example('$0 t', 'Show current time (alias for time)')
