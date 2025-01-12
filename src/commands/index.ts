@@ -18,6 +18,7 @@ import { registerAlias, resolveCommand, clearAliases } from '../services/command
 
 interface CommitArgs {
   verbose?: boolean;
+  build?: boolean;
 }
 
 interface GitArgs {
@@ -103,15 +104,21 @@ const commands: Array<any> = [
     aliases: ['p', 'pu'],
     describe: 'Push changes with optional commit message (uses AI if message is empty)',
     builder: (yargs: Argv) => {
-      return yargs.option('verbose', {
-        alias: 'v',
-        type: 'boolean',
-        description: 'Show diff information when generating commit message'
-      });
+      return yargs
+        .option('verbose', {
+          alias: 'v',
+          type: 'boolean',
+          description: 'Show diff information when generating commit message'
+        })
+        .option('build', {
+          alias: 'b',
+          type: 'boolean',
+          description: 'Add [build] tag to commit message'
+        });
     },
     handler: async (argv: any) => {
       try {
-        await handleGitPush(argv.verbose);
+        await handleGitPush(argv.verbose, argv.build);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -192,12 +199,17 @@ const commands: Array<any> = [
           alias: 'v',
           type: 'boolean',
           description: 'Show diff information when generating commit message'
+        })
+        .option('build', {
+          alias: 'b',
+          type: 'boolean',
+          description: 'Add [build] tag to commit message'
         });
     },
     handler: async (argv: any) => {
       try {
         const args = argv as CommitArgs;
-        await handleGitCommit(args.verbose);
+        await handleGitCommit(args.verbose, args.build);
       } catch (error: any) {
         console.error("Error:", error.message);
       }

@@ -98,7 +98,7 @@ function getUnstagedChanges(): string[] {
 }
 
 // 处理 commit 命令
-export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
+export async function handleGitCommit(verbose?: boolean, build?: boolean): Promise<boolean> {
   try {
     // 检查是否有未暂存的更改
     const unstagedChanges = getUnstagedChanges();
@@ -162,6 +162,11 @@ export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
       message = manualMessage;
     }
 
+    // 如果有 build 标识，在消息末尾添加 [build]
+    if (build) {
+      message = `${message} [build]`;
+    }
+
     // 执行 git commit
     execSync(`git commit -m "${message}"`, { stdio: 'inherit' });
     console.log(chalk.green('✓ Changes committed successfully'));
@@ -174,52 +179,53 @@ export async function handleGitCommit(verbose?: boolean): Promise<boolean> {
 }
 
 // 处理 push 命令
-export async function handleGitPush(verbose?: boolean) {
+export async function handleGitPush(verbose?: boolean, build?: boolean) {
   try {
     // 显示当前状态并检查是否有更改或未推送的提交
     const status = showGitStatus();
     
-    // 如果有未提交的更改，先提交
     if (status.hasChanges) {
-      const commitSuccess = await handleGitCommit(verbose);
+      console.log(chalk.yellow('\nUncommitted changes found. Committing first...'));
+      const commitSuccess = await handleGitCommit(verbose, build);
       if (!commitSuccess) {
+        return;
+      }
+    } else if (!status.hasUnpushedCommits) {
+      console.log(chalk.green('✓ No changes to push'));
+      return;
+    }
+
+    // 获取当前分支名
+    const branch = status.currentBranch;
+
+    // 检查是否有上游分支
+    try {
+      execSync('git rev-parse --abbrev-ref --symbolic-full-name @{u}', { stdio: 'ignore' });
+    } catch (error) {
+      // 如果没有上游分支，询问是否设置
+      const { setupUpstream } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'setupUpstream',
+        message: `No upstream branch found for '${branch}'. Would you like to set it up?`,
+        default: true
+      }]);
+
+      if (setupUpstream) {
+        execSync(`git push --set-upstream origin ${branch}`, { stdio: 'inherit' });
+        console.log(chalk.green('✓ Upstream branch set up successfully'));
+        return;
+      } else {
+        console.log(chalk.yellow('Push cancelled'));
         return;
       }
     }
 
-    // 如果没有任何需要推送的内容，退出
-    if (!status.hasChanges && !status.hasUnpushedCommits) {
-      return;
-    }
-
-    // 询问是否推送
-    const { autoPush } = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'autoPush',
-      message: 'Would you like to push these changes?',
-      default: true
-    }]);
-
-    if (!autoPush) {
-      console.log(chalk.yellow('Push cancelled'));
-      return;
-    }
-    
-    // 检查是否有远程分支
-    const hasRemote = execSync(`git ls-remote --heads origin ${status.currentBranch}`).toString().trim();
-    
-    // 如果没有远程分支，创建并设置上游
-    if (!hasRemote) {
-      console.log(chalk.yellow(`Remote branch '${status.currentBranch}' not found. Creating it...`));
-      execSync(`git push -u origin ${status.currentBranch}`, { stdio: 'inherit' });
-    } else {
-      // 如果有远程分支，直接推送
-      execSync('git push', { stdio: 'inherit' });
-    }
-    
+    // 执行 git push
+    execSync('git push', { stdio: 'inherit' });
     console.log(chalk.green('✓ Changes pushed successfully'));
+
   } catch (error: any) {
-    console.error(chalk.red('Git push failed:'), error.message);
+    console.error(chalk.red('Error:'), error.message);
   }
 }
 
