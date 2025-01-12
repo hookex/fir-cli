@@ -81,6 +81,7 @@ function findMatchingCommands(input: string): string[] {
 const commands: Array<any> = [
   {
     command: 'chrome [url]',
+    aliases: ['c', 'ch'],
     describe: 'Open Chrome browser',
     builder: (yargs: Argv) => {
       return yargs.positional('url', {
@@ -203,39 +204,26 @@ const commands: Array<any> = [
   },
   {
     command: 'ping [domain]',
+    aliases: ['p', 'pi'],
     describe: 'Ping domain(s)',
     handler: (argv: any) => handlePing(argv.domain)
   },
   {
     command: 'install [args..]',
+    aliases: ['i', 'in'],
     describe: 'Run or install and run a global npm package',
     builder: (yargs: Argv) => {
       return yargs
-        .positional('command', {
-          type: 'string',
-          describe: 'Command to run'
-        })
         .positional('args', {
           type: 'string',
-          describe: 'Command arguments',
-          array: true
+          describe: 'Command and arguments to run'
         });
     },
     handler: async (argv: any) => {
-      const command = argv.command;
-      
       try {
-        // 检查是否是内部命令或别名
-        const resolvedCommand = await resolveCommand(command);
-        if (resolvedCommand) {
-          // 如果是别名，使用原始命令
-          const args = argv.args || [];
-          argv._ = [resolvedCommand.name, ...args];
-          return;
-        }
-
-        // 如果不是内部命令或别名，尝试作为 npm 包运行
-        await handleNpmCommand(command, argv.args || []);
+        const command = argv.args[0];
+        const args = argv.args.slice(1);
+        await handleNpmCommand(command, args);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -249,30 +237,21 @@ const commands: Array<any> = [
   },
   {
     command: 'config',
+    aliases: ['c', 'co'],
     describe: 'Configure settings and view history',
-    handler: async () => {
-      try {
-        await handleConfig();
-      } catch (error: any) {
-        console.error("Error:", error.message);
-      }
-    }
+    handler: handleConfig
   },
   {
     command: 'ai [question]',
+    aliases: ['a', 'ai'],
     describe: 'Chat with AI assistant',
     handler: (argv: any) => handleAI(argv.question)
   },
   {
     command: 'clean',
+    aliases: ['c', 'cl'],
     describe: 'Clean git changes, restore modified files and remove untracked files',
-    handler: async () => {
-      try {
-        await handleClean();
-      } catch (error: any) {
-        console.error("Error:", error.message);
-      }
-    }
+    handler: handleClean
   },
   {
     command: 'debug',
@@ -298,8 +277,11 @@ export async function registerCommands() {
     const matchingCommands = findMatchingCommands(input);
     
     if (matchingCommands.length > 0) {
-      // 有匹配的命令，让用户选择
-      const selectedCommand = await handleCommandConflict(input, matchingCommands);
+      // 如果只有一个匹配的命令，直接执行
+      const selectedCommand = matchingCommands.length === 1 
+        ? matchingCommands[0] 
+        : await handleCommandConflict(input, matchingCommands);
+
       // 执行选中的命令
       const newArgs = [selectedCommand, ...args.slice(1)];
       const cmdPath = process.argv[1];
