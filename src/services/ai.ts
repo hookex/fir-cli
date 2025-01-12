@@ -1,75 +1,96 @@
 import axios from 'axios';
-import { execSync } from 'child_process';
-import chalk from 'chalk';
 import { config } from '../config/config.js';
+import { getConfig } from '../config/ai.js';
+import chalk from 'chalk';
+import { execSync } from 'child_process';
 
-export async function generateCommitMessage(verbose: boolean = false, language: string = 'en'): Promise<string> {
+const conventionalCommitPattern = /^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\([a-z-]+\))?: .+/;
+
+function getGitChanges(verbose: boolean): string {
   try {
-    // 获取 git diff 信息
-    let diffInfo = '';
-    if (verbose) {
-      diffInfo = execSync('git diff --cached').toString();
-      console.log('Changes to be committed:');
-      console.log(diffInfo);
+    let changes = '';
+    
+    // 获取暂存区文件列表
+    const stagedFiles = execSync('git diff --cached --name-only', { encoding: 'utf-8' }).trim();
+    if (stagedFiles) {
+      changes += '暂存的文件:\n' + stagedFiles + '\n\n';
     }
 
-    // 获取文件变更信息
-    const files = execSync('git diff --cached --name-only').toString().trim();
+    if (verbose) {
+      // 获取详细的差异
+      const diff = execSync('git diff --cached', { encoding: 'utf-8' }).trim();
+      if (diff) {
+        changes += '详细更改:\n' + diff;
+      }
+    }
+
+    return changes || '没有暂存的更改';
+  } catch (error) {
+    console.error('Error getting git changes:', error);
+    return '无法获取 git 更改';
+  }
+}
+
+export async function generateCommitMessage(verbose?: boolean): Promise<string> {
+  try {
+    const { language } = getConfig();
     
-    // 准备提示信息
-    const systemPrompt = language === 'zh'
-      ? `你是一个 Git 提交信息生成器。生成极其简短的提交信息：
-         1. 格式：<type>: <description>
-         2. type: feat, fix, docs, style, refactor, test, chore
-         3. description 必须极其简短，使用最少的字描述变更
-         4. 不要加句号，不要有多余的空格
-         5. 最大长度：50个字符
-         
-         好的示例：
-         - docs: 更新README
-         - feat: 添加登录
-         - fix: 修复崩溃
-         - style: 优化格式
-         
-         不好的示例：
-         - docs: 更新了 README.md 的文档内容 (太长)
-         - feat: 添加了用户登录功能 (太长)
-         - fix: 修复了应用崩溃的问题 (太长)`
-      : `You are a Git commit message generator. Generate extremely concise messages:
-         1. Format: <type>: <description>
-         2. type: feat, fix, docs, style, refactor, test, chore
-         3. description must be extremely short, use minimal words
-         4. no period, no extra spaces
-         5. maximum length: 50 characters
-         
-         Good examples:
-         - docs: update README
-         - feat: add login
-         - fix: resolve crash
-         - style: improve format
-         
-         Bad examples:
-         - docs: update the README.md documentation content (too long)
-         - feat: add user login functionality (too long)
-         - fix: resolve application crash issue (too long)`;
+    // 构建更详细的系统提示
+    const systemPrompt = language === 'zh' ?
+      `你是一个专业的代码审查者，负责生成高质量的 Git 提交消息。请遵循以下规则：
 
-    const userPrompt = language === 'zh'
-      ? `请根据以下 Git 变更生成提交信息：\n${files}${verbose ? `\n变更详情：\n${diffInfo}` : ''}`
-      : `Generate a commit message for these changes:\n${files}${verbose ? `\nChanges:\n${diffInfo}` : ''}`;
+1. 使用 Conventional Commits 规范：
+   - 格式：<type>[(scope)]: <description>
+   - 类型：feat(新功能), fix(修复), docs(文档), style(格式), refactor(重构), perf(性能), test(测试), chore(杂项)
+   - 范围是可选的，用小写字母，例如：cli, api, core
+   - 描述使用中文，简洁明了，不超过50个字符
+   
+2. 消息风格：
+   - 以动词开头：添加、修复、改进、更新、删除等
+   - 清晰描述改动的内容和目的
+   - 如果修复了问题，说明修复了什么
+   - 如果添加了功能，说明添加了什么
 
-    // 调用 AI API
+3. 示例：
+   - feat(cli): 添加自动补全功能
+   - fix(api): 修复请求超时问题
+   - refactor: 重构命令处理逻辑
+   - style(ui): 改进错误提示样式
+
+请根据以下 Git 更改生成提交消息：` :
+      `You are a professional code reviewer responsible for generating high-quality Git commit messages. Please follow these rules:
+
+1. Follow Conventional Commits specification:
+   - Format: <type>[(scope)]: <description>
+   - Types: feat(new feature), fix(bug fix), docs(documentation), style(formatting), refactor(refactoring), perf(performance), test(testing), chore(maintenance)
+   - Scope is optional, use lowercase, e.g.: cli, api, core
+   - Description should be clear and concise, not exceeding 50 characters
+   
+2. Message style:
+   - Start with a verb: add, fix, improve, update, remove, etc.
+   - Clearly describe what and why was changed
+   - If fixing an issue, state what was fixed
+   - If adding a feature, state what was added
+
+3. Examples:
+   - feat(cli): add auto-completion support
+   - fix(api): resolve request timeout issue
+   - refactor: restructure command handling logic
+   - style(ui): improve error message display
+
+Please generate a commit message based on the following Git changes:`;
+
+    const changes = getGitChanges(verbose || false);
+    
     const response = await axios.post(config.ai.baseURL, {
       model: config.ai.model,
       messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: userPrompt
-        }
-      ]
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: changes }
+      ],
+      temperature: 0.7,
+      max_tokens: 100,
+      stream: false
     }, {
       headers: {
         'Authorization': `Bearer ${config.ai.apiKey}`,
@@ -77,29 +98,18 @@ export async function generateCommitMessage(verbose: boolean = false, language: 
       }
     });
 
-    const commitMessage = response.data.choices[0].message.content.trim();
+    const message = response.data.choices[0].message.content.trim();
     
-    if (!commitMessage) {
-      throw new Error('API returned empty response');
-    }
-
-    // 验证 commit message 格式
-    if (!isValidCommitMessage(commitMessage)) {
+    // 检查生成的消息是否符合规范
+    if (!conventionalCommitPattern.test(message)) {
       console.log(chalk.yellow('\nWarning: Generated commit message does not follow conventional commits format'));
-      console.log(chalk.gray('Format should be: type: description'));
-      console.log(chalk.gray('Example: feat: add new command'));
+      console.log(chalk.gray('Format should be: type(scope?): description'));
+      console.log(chalk.gray('Example: feat(cli): add new command'));
     }
-
-    return commitMessage;
+    
+    return message;
   } catch (error: any) {
     console.error(chalk.red('Error generating commit message:'), error.message);
     throw error;
   }
-}
-
-// 验证 commit message 格式
-function isValidCommitMessage(message: string): boolean {
-  // 更宽松的正则表达式，允许中文字符，但限制更短的长度
-  const pattern = /^(feat|fix|docs|style|refactor|test|chore): [\u4e00-\u9fa5a-zA-Z0-9\s_\-\.]+$/;
-  return pattern.test(message) && message.length <= 50;
 }

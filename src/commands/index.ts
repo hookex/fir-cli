@@ -14,13 +14,11 @@ import { handleDebug } from './debug.js';
 import chalk from 'chalk';
 
 interface CommitArgs {
-  message?: string;
   verbose?: boolean;
 }
 
 interface GitArgs {
   action: string;
-  message?: string;
 }
 
 interface TimeArgs {
@@ -51,25 +49,26 @@ const commands: Array<any> = [
     }
   },
   {
-    command: 'push [message]',
+    command: 'push',
     aliases: ['p'],
     describe: 'Push changes with optional commit message (uses AI if message is empty)',
     builder: (yargs: Argv) => {
-      return yargs.positional('message', {
-        type: 'string',
-        describe: 'Commit message (optional, will use AI if not provided)'
+      return yargs.option('verbose', {
+        alias: 'v',
+        type: 'boolean',
+        description: 'Show diff information when generating commit message'
       });
     },
     handler: async (argv: any) => {
       try {
-        await handleGitPush(argv.message);
+        await handleGitPush(argv.verbose);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
     }
   },
   {
-    command: 'git <action> [message]',
+    command: 'git <action>',
     describe: 'Git operations',
     aliases: ['g'],
     builder: (yargs: Argv) => {
@@ -77,10 +76,6 @@ const commands: Array<any> = [
         .positional('action', {
           choices: ['open'] as const,
           describe: 'Git action to perform'
-        })
-        .positional('message', {
-          type: 'string',
-          describe: 'Optional commit message for push'
         });
     },
     handler: async (argv: any) => {
@@ -138,14 +133,10 @@ const commands: Array<any> = [
     }
   },
   {
-    command: 'commit [message]',
+    command: 'commit',
     describe: 'Commit changes with a message (uses AI if message is empty)',
     builder: (yargs: Argv) => {
       return yargs
-        .positional('message', {
-          type: 'string',
-          describe: 'Commit message (optional, will use AI if not provided)'
-        })
         .option('verbose', {
           alias: 'v',
           type: 'boolean',
@@ -154,8 +145,8 @@ const commands: Array<any> = [
     },
     handler: async (argv: any) => {
       try {
-        const args = argv as CommitArgs & { verbose?: boolean };
-        await handleGitCommit(args.message, args.verbose);
+        const args = argv as CommitArgs;
+        await handleGitCommit(args.verbose);
       } catch (error: any) {
         console.error("Error:", error.message);
       }
@@ -252,10 +243,10 @@ export function registerCommands() {
     .example('f nrm', 'Install and run nrm if not found')
     .example('f nrm ls', 'Run nrm with arguments')
     .example('f commit', 'Commit changes with AI-generated message')
-    .example('f commit "feat: update readme"', 'Commit with specific message')
+    .example('f commit -v', 'Commit with verbose output')
     .example('f push', 'Commit with AI-generated message and push')
     .example('f p', 'Shorthand for push with AI commit')
-    .example('f push "feat: add feature"', 'Push with specific commit message')
+    .example('f push -v', 'Push with verbose output')
     .example('f g open', 'Open repository in browser (alias for git open)')
     .example('f i', 'Show local IP addresses (alias for ip)')
     .example('f t', 'Show current time (alias for time)')
@@ -281,13 +272,20 @@ export function registerCommands() {
       handler: (argv: any) => handleChrome('chrome', argv.url)
     })
     .command({
-      command: 'push [message]',
-      describe: 'Push changes with optional commit message (uses AI if message is empty)',
+      command: 'push',
       aliases: ['p'],
-      handler: (argv: ArgumentsCamelCase<any>) => handleGitPush(argv.message)
+      describe: 'Push changes with optional commit message (uses AI if message is empty)',
+      builder: (yargs: Argv) => {
+        return yargs.option('verbose', {
+          alias: 'v',
+          type: 'boolean',
+          description: 'Show diff information when generating commit message'
+        });
+      },
+      handler: (argv: ArgumentsCamelCase<any>) => handleGitPush(argv.verbose)
     })
     .command({
-      command: 'git <action> [message]',
+      command: 'git <action>',
       describe: 'Git operations (open: open repo in browser)',
       aliases: ['g'],
       handler: async (argv: ArgumentsCamelCase<GitArgs>) => {
@@ -340,14 +338,10 @@ export function registerCommands() {
       }
     })
     .command({
-      command: 'commit [message]',
+      command: 'commit',
       describe: 'Commit changes with a message (uses AI if message is empty)',
       builder: (yargs: Argv) => {
         return yargs
-          .positional('message', {
-            type: 'string',
-            describe: 'Commit message (optional, will use AI if not provided)'
-          })
           .option('verbose', {
             alias: 'v',
             type: 'boolean',
@@ -356,7 +350,7 @@ export function registerCommands() {
       },
       handler: async (argv: ArgumentsCamelCase<CommitArgs>) => {
         try {
-          await handleGitCommit(argv.message, argv.verbose);
+          await handleGitCommit(argv.verbose);
         } catch (error: any) {
           console.error("Error:", error.message);
         }
