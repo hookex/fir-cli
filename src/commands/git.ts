@@ -4,6 +4,7 @@ import open from 'open';
 import { generateCommitMessage } from '../services/ai.js';
 import inquirer from 'inquirer';
 import { getConfig } from '../config/ai.js';
+import ora from 'ora';
 
 export async function handleGitCommit(message?: string, verbose?: boolean): Promise<void> {
   try {
@@ -133,5 +134,107 @@ export async function handleGitOpen(): Promise<void> {
     await open(httpsUrl);
   } catch (error: any) {
     console.error('Error:', error.message);
+  }
+}
+
+interface GitStatus {
+  modified: string[];
+  added: string[];
+  untracked: string[];
+}
+
+function getGitStatus(): GitStatus {
+  const status = {
+    modified: [] as string[],
+    added: [] as string[],
+    untracked: [] as string[]
+  };
+
+  try {
+    // 获取 git status 输出
+    const output = execSync('git status --porcelain', { encoding: 'utf-8' });
+    
+    // 解析每一行
+    output.split('\n').forEach(line => {
+      if (!line) return;
+      
+      const [state, file] = [line.slice(0, 2).trim(), line.slice(3)];
+      
+      if (state === 'M') {
+        status.modified.push(file);
+      } else if (state === 'A') {
+        status.added.push(file);
+      } else if (state === '??') {
+        status.untracked.push(file);
+      }
+    });
+  } catch (error) {
+    console.error(chalk.red('Error getting git status:'), error);
+  }
+
+  return status;
+}
+
+async function confirmClean(status: GitStatus) {
+  const { modified, added, untracked } = status;
+  const hasChanges = modified.length > 0 || added.length > 0 || untracked.length > 0;
+
+  if (!hasChanges) {
+    console.log(chalk.green('✓ Working directory is clean'));
+    return false;
+  }
+
+  console.log(chalk.yellow('\nFound changes:'));
+  
+  if (modified.length > 0) {
+    console.log(chalk.cyan('\nModified files:'));
+    modified.forEach(file => console.log(chalk.gray(`  ${file}`)));
+  }
+  
+  if (added.length > 0) {
+    console.log(chalk.cyan('\nAdded files:'));
+    added.forEach(file => console.log(chalk.gray(`  ${file}`)));
+  }
+  
+  if (untracked.length > 0) {
+    console.log(chalk.cyan('\nUntracked files:'));
+    untracked.forEach(file => console.log(chalk.gray(`  ${file}`)));
+  }
+
+  const { confirm } = await inquirer.prompt([{
+    type: 'confirm',
+    name: 'confirm',
+    message: chalk.yellow('Are you sure you want to clean these changes?'),
+    default: false
+  }]);
+
+  return confirm;
+}
+
+export async function handleClean() {
+  const spinner = ora('Checking git status...').start();
+  
+  try {
+    const status = getGitStatus();
+    spinner.stop();
+
+    if (await confirmClean(status)) {
+      spinner.start('Cleaning changes...');
+      
+      // 重置已暂存的更改
+      if (status.modified.length > 0 || status.added.length > 0) {
+        execSync('git reset --hard HEAD');
+      }
+      
+      // 删除未跟踪的文件和目录
+      if (status.untracked.length > 0) {
+        execSync('git clean -fd');
+      }
+      
+      spinner.succeed('Changes cleaned successfully');
+    }
+  } catch (error: any) {
+    spinner.fail('Failed to clean changes');
+    console.error(chalk.red('Error:'), error.message);
   }
 }

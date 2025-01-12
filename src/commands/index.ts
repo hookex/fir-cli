@@ -1,7 +1,7 @@
 import yargs, { Argv, ArgumentsCamelCase } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { openBrowser as handleChrome } from './browser.js';
-import { handleGitOpen, handleGitCommit, handleGitPush } from './git.js';
+import { handleGitOpen, handleGitCommit, handleGitPush, handleClean } from './git.js';
 import { getLocalIPs as handleIp } from './ip.js';
 import { showTime as handleTime } from './time.js';
 import { openInEditor as handleVSCode } from './vscode.js';
@@ -199,6 +199,17 @@ const commands: Array<any> = [
     aliases: ['t'],
     describe: 'Translate text between English and Chinese',
     handler: (argv: any) => handleTranslate(argv.text)
+  },
+  {
+    command: 'clean',
+    describe: 'Clean git changes, restore modified files and remove untracked files',
+    handler: async () => {
+      try {
+        await handleClean();
+      } catch (error: any) {
+        console.error("Error:", error.message);
+      }
+    }
   }
 ];
 
@@ -235,7 +246,8 @@ export function registerCommands() {
     .example('f ping', 'Ping top 10 most visited domains')
     .example('f ping github.com', 'Ping specific domain')
     .example('f ai', 'Configure AI settings')
-    .example('f translate "hello world"', 'Translate text between English and Chinese');
+    .example('f translate "hello world"', 'Translate text between English and Chinese')
+    .example('f clean', 'Clean git changes, restore modified files and remove untracked files');
 
   // 添加命令
   yargsInstance = yargsInstance
@@ -320,6 +332,17 @@ export function registerCommands() {
       aliases: ['t'],
       describe: 'Translate text between English and Chinese',
       handler: (argv: any) => handleTranslate(argv.text)
+    })
+    .command({
+      command: 'clean',
+      describe: 'Clean git changes, restore modified files and remove untracked files',
+      handler: async () => {
+        try {
+          await handleClean();
+        } catch (error: any) {
+          console.error("Error:", error.message);
+        }
+      }
     })
     .command({
       command: '*',
