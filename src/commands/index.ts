@@ -8,6 +8,7 @@ import { openInEditor as handleVSCode } from './vscode.js';
 import { installAndRunGlobalPackage as handleNpmCommand } from './npm.js';
 import { handlePing } from './ping.js';
 import { handleAI } from './ai.js';
+import { handleTranslate } from './translate.js';
 import chalk from 'chalk';
 
 interface CommitArgs {
@@ -192,6 +193,12 @@ const commands: Array<any> = [
         console.error("Error:", error.message);
       }
     }
+  },
+  {
+    command: 'translate <text>',
+    aliases: ['t'],
+    describe: 'Translate text between English and Chinese',
+    handler: (argv: any) => handleTranslate(argv.text)
   }
 ];
 
@@ -227,7 +234,8 @@ export function registerCommands() {
     .example('f commit --verbose', 'Show diff when generating commit message')
     .example('f ping', 'Ping top 10 most visited domains')
     .example('f ping github.com', 'Ping specific domain')
-    .example('f ai', 'Configure AI settings');
+    .example('f ai', 'Configure AI settings')
+    .example('f translate "hello world"', 'Translate text between English and Chinese');
 
   // 添加命令
   yargsInstance = yargsInstance
@@ -306,6 +314,12 @@ export function registerCommands() {
           console.error("Error:", error.message);
         }
       }
+    })
+    .command({
+      command: 'translate <text>',
+      aliases: ['t'],
+      describe: 'Translate text between English and Chinese',
+      handler: (argv: any) => handleTranslate(argv.text)
     })
     .command({
       command: '*',
