@@ -16,7 +16,7 @@
     "dev": "ts-node --no-deprecation src/index.ts",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "publish:local": "npm run build && npm uninstall -g fir-cli && npm install -g --force",
+    "publish:local": "npm run build && npm install -g --force",
     "publish:npm": "fir push && npm version patch && npm publish && git push --follow-tags"
   },
   "keywords": [

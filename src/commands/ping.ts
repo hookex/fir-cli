@@ -4,18 +4,14 @@ import chalk from 'chalk';
 
 const execAsync = promisify(exec);
 
-// 全球访问量前10的域名
 const TOP_10_DOMAINS = [
+  'baidu.com',
+  'taobao.com',
   'google.com',
-  'youtube.com',
-  'facebook.com',
-  'twitter.com',
-  'instagram.com',
-  'microsoft.com',
-  'amazon.com',
-  'netflix.com',
-  'apple.com',
-  'github.com'
+  'github.com',
+  'bytedance.net',
+  'bytedance.net',
+  'registry.npmjs.org',
 ];
 
 interface PingResult {
