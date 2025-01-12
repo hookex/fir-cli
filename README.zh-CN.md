@@ -64,7 +64,7 @@ CLI 工具可以直接使用基本的 Git 操作。如果需要使用 AI 功能�
 | `f clean` | - | 清理工作目录 | `f clean` |
 | `f git` | `f g` | Git 操作 | `f git open` |
 | 编辑器命令 |
-| `f code` | `f c`, `f o` | 在 VS Code 中打开 | `f code` |
+| `f code` | `f e`, `f o` | 在 VS Code 中打开 | `f code` |
 | 浏览器命令 |
 | `f chrome` | - | 打开 Chrome | `f chrome` |
 | `f chrome <url>` | - | 使用 URL 打开 Chrome | `f chrome https://github.com` |
@@ -75,8 +75,8 @@ CLI 工具可以直接使用基本的 Git 操作。如果需要使用 AI 功能�
 | `f nrm` | - | 运行 NRM 包 | `f nrm ls` |
 | `f ncu` | - | 检查包更新 | `f ncu` |
 | 时间命令 |
-| `f time` | `f t` | 显示当前时间 | `f time` |
-| `f time --watch` | `f t -w` | 显示自动更新的时间 | `f time --watch` |
+| `f time` | `f tm` | 显示当前时间 | `f time` |
+| `f time --watch` | `f tm -w` | 显示自动更新的时间 | `f time --watch` |
 | AI 命令 |
 | `f translate` | `f t` | 在中英文之间翻译文本 | `f translate "你好"` |
 | `f debug` | `f d` | 使用 AI 辅助调试代码 | `f debug` |

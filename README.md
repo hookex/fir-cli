@@ -64,7 +64,7 @@ Or use environment variables:
 | `f clean` | - | Clean working directory | `f clean` |
 | `f git` | `f g` | Git operations | `f git open` |
 | Editor Commands |
-| `f code` | `f c`, `f o` | Open in VS Code | `f code` |
+| `f code` | `f e`, `f o` | Open in VS Code | `f code` |
 | `f webstorm` | - | Open in WebStorm | `f webstorm` |
 | Browser Commands |
 | `f chrome` | - | Open Chrome | `f chrome` |
@@ -76,8 +76,8 @@ Or use environment variables:
 | `f nrm` | - | Run NRM package | `f nrm ls` |
 | `f ncu` | - | Check package updates | `f ncu` |
 | Time Commands |
-| `f time` | `f t` | Show current time | `f time` |
-| `f time --watch` | `f t -w` | Show auto-updating time | `f time --watch` |
+| `f time` | `f tm` | Show current time | `f time` |
+| `f time --watch` | `f tm -w` | Show auto-updating time | `f time --watch` |
 | AI Commands |
 | `f translate` | `f t` | Translate text between languages | `f translate "Hello"` |
 | `f debug` | `f d` | Debug code with AI assistance | `f debug` |
