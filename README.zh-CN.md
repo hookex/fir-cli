@@ -1,8 +1,192 @@
 # fir-cli
 
-> 使用 TypeScript 编写的个人命令行工具集
+一个现代化的命令行工具，通过 AI 功能增强你的开发工作流程。
 
-[English](./README.md) | [简体中文](./README.zh-CN.md)
+## 功能特性
+
+### Git 命令
+
+#### 提交更改 (`f commit` 或 `f c`)
+使用 AI 生成的提交消息提交更改。
+
+功能特点：
+- 自动检测和暂存未暂存的更改
+- 使用 AI 生成有意义的提交消息
+- 支持手动输入提交消息
+- 显示详细的状态信息
+
+示例：
+```bash
+# 使用 AI 消息基本提交
+f commit
+
+# 使用详细模式提交（显示详细更改）
+f c -v
+
+# AI 生成的消息示例：
+feat(auth): 添加 Google OAuth2 认证
+- 实现 Google 认证的 OAuth2 流程
+- 添加用户资料同步
+- 更新 OAuth 凭证配置
+```
+
+#### 推送更改 (`f push` 或 `f p`)
+推送更改到远程仓库。
+
+功能特点：
+- 显示当前更改和未推送的提交
+- 自动暂存和提交更改
+- 如需要则创建远程分支
+- 处理上游分支设置
+
+示例：
+```bash
+# 使用 AI 提交消息推送
+f push
+
+# 使用详细模式推送
+f p -v
+
+# 状态输出示例：
+Git 状态：
+----------------------------------------
+分支：feature/auth
+最后提交：a1b2c3d - feat: 添加登录页面
+
+更改的文件：
+  修改：src/auth/login.ts
+  新增：src/components/LoginForm.tsx
+  
+未推送的提交：
+a1b2c3d feat: 添加登录页面
+b2c3d4e fix: 处理认证错误
+----------------------------------------
+```
+
+#### 打开仓库 (`f open`)
+在浏览器中打开仓库。
+
+功能特点：
+- 支持 HTTPS 和 SSH 远程 URL
+- 在默认浏览器中打开
+- 支持 GitHub、GitLab 和 Bitbucket URL
+
+示例：
+```bash
+# 打开当前仓库
+f open
+
+# 输出示例：
+✓ 在浏览器中打开 https://github.com/username/repo
+```
+
+#### 清理工作目录 (`f clean`)
+清理工作目录并删除未跟踪的文件。
+
+功能特点：
+- 清理前显示详细状态
+- 重置暂存的更改
+- 删除未跟踪的文件
+- 交互式确认
+
+示例：
+```bash
+# 清理工作目录
+f clean
+
+# 输出示例：
+发现更改：
+
+修改的文件：
+  src/components/Button.tsx
+  src/styles/main.css
+
+未跟踪的文件：
+  .env.local
+  temp/
+```
+
+### AI 命令
+
+#### 代码翻译 (`f translate` 或 `f t`)
+在不同编程语言之间翻译代码。
+
+功能特点：
+- 支持多种编程语言
+- 保持代码结构和逻辑
+- 添加有用的注释
+- 处理语言特定的习惯用法
+
+示例：
+```bash
+# 翻译当前文件
+f translate python typescript
+
+# 输出示例：
+# Python 输入：
+def calculate_total(items):
+    return sum(item.price for item in items)
+
+# TypeScript 输出：
+function calculateTotal(items: Item[]): number {
+    return items.reduce((sum, item) => sum + item.price, 0);
+}
+```
+
+#### 调试代码 (`f debug` 或 `f d`)
+使用 AI 辅助调试代码。
+
+功能特点：
+- 分析代码和错误消息
+- 提供详细解释
+- 建议修复方案
+- 显示示例
+
+示例：
+```bash
+# 调试最后一个错误
+f debug
+
+# 输出示例：
+错误分析：
+- TypeError：无法读取 undefined 的 'data' 属性
+- 位置：src/api/users.ts:45
+- 根本原因：在访问之前 API 响应是 undefined
+
+解决方案：
+1. 在访问数据之前添加空值检查：
+   ```typescript
+   const response = await api.get('/users');
+   const data = response?.data ?? [];
+   ```
+
+预防措施：
+- 始终处理 undefined/null 情况
+- 使用可选链和空值合并
+- 添加类型检查
+```
+
+## 配置
+
+在你的主目录中创建 `.firrc` 文件：
+
+```json
+{
+  "openai": {
+    "apiKey": "你的-api-密钥",
+    "apiBaseUrl": "你的-api-基础-url",
+    "apiModel": "你的-api-模型"
+  }
+}
+```
+
+## 环境变量
+
+使用环境变量配置 CLI：
+
+- `OPENAI_API_KEY`：你的 OpenAI API 密钥
+- `OPENAI_API_BASE_URL`：自定义 API 基础 URL（可选）
+- `OPENAI_API_MODEL`：自定义 API 模型（可选）
 
 ## 安装
 
@@ -10,86 +194,44 @@
 npm install -g fir-cli
 ```
 
-## 特性
-
-- 🤖 **AI 驱动的 Git 提交**: 自动生成规范的提交信息
-- 🚀 **智能编辑器集成**: 在 VS Code 或 WebStorm 中打开项目
-- 🌐 **浏览器命令**: 快速启动 Chrome 并支持 URL
-- 📦 **NPM 工具**: 运行全局包并检查更新
-- ⏰ **时间显示**: 显示当前时间，支持自动更新
-
 ## 使用方法
 
-```bash
-fir [命令] [选项]
-```
+1. 初始化 Git 仓库：
+   ```bash
+   git init
+   ```
 
-### Git 命令
+2. 对代码进行一些更改
 
-```bash
-# 使用 AI 生成的消息提交更改
-fir commit
+3. 使用 AI 提交更改：
+   ```bash
+   f commit
+   ```
 
-# 使用指定消息提交
-fir commit "feat: 添加新功能"
+4. 推送更改到远程：
+   ```bash
+   f push
+   ```
 
-# 使用 AI 消息提交并推送
-fir push
+5. 在浏览器中打开仓库：
+   ```bash
+   f open
+   ```
 
-# 使用指定消息推送
-fir push "feat: 新功能"
+6. 清理工作目录：
+   ```bash
+   f clean
+   ```
 
-# 在浏览器中打开仓库
-fir open
-```
+7. 翻译代码：
+   ```bash
+   f translate
+   ```
 
-### 编辑器命令
-
-```bash
-# 在编辑器中打开当前目录（VS Code 或 WebStorm）
-fir code
-fir c    # 简写
-fir o    # 另一个简写
-```
-
-### 浏览器命令
-
-```bash
-# 打开 Chrome
-fir chrome
-
-# 使用指定 URL 打开 Chrome
-fir chrome https://github.com
-```
-
-### NPM 命令
-
-```bash
-# 安装并运行全局包
-fir nrm
-fir nrm ls
-
-# 检查包更新
-fir ncu
-```
-
-### 时间命令
-
-```bash
-# 显示当前时间
-fir time
-fir t
-
-# 显示自动更新的时间
-fir time --watch
-fir t -w
-```
-
-## 配置
-
-### 环境变量
-
-- `ARK_API_KEY`: AI 提交信息生成的 API 密钥（可选）
+8. 调试代码：
+   ```bash
+   f debug
+   ```
 
 ## 开发
 
@@ -102,9 +244,9 @@ fir t -w
    ```bash
    npm run build
    ```
-4. 全局安装以测试：
+4. 链接到本地开发：
    ```bash
-   npm install -g --force
+   npm link
    ```
 
 ## 许可证
