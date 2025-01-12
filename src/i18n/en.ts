@@ -106,11 +106,22 @@ export default {
     statistics: {
       desc: 'Show code statistics by file extension',
       title: 'Code Statistics',
+      current: 'Current Project Statistics',
+      day: 'Last 24 Hours Changes',
+      week: 'Last Week Changes',
+      month: 'Last Month Changes',
+      year: 'Last Year Changes',
       header: 'Extension',
       files: 'Files',
       lines: 'Lines',
+      added: 'Added',
+      deleted: 'Deleted',
       percentage: 'Percentage',
-      total: 'Total'
+      total: 'Total',
+      dayOption: 'Show changes in the last 24 hours',
+      weekOption: 'Show changes in the last week',
+      monthOption: 'Show changes in the last month',
+      yearOption: 'Show changes in the last year'
     }
   },
   common: {

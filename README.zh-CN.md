@@ -82,7 +82,11 @@ CLI 工具可以直接使用基本的 Git 操作。如果需要使用 AI 功能�
 | 网络命令 |
 | `f ip` | `f i`, `f ip` | 显示本地 IP 地址 | `f ip` |
 | `f ping` | `f p`, `f pi` | Ping 域名 | `f ping github.com` |
-| `f statistics` | - | 显示各类型文件的代码统计 | `f statistics` |
+| `f statistics` | `f s`, `f st`, `f stats` | 显示代码统计 | `f statistics` |
+| `f statistics -d` | - | 显示最近24小时变更 | `f statistics -d` |
+| `f statistics -w` | - | 显示最近一周变更 | `f statistics -w` |
+| `f statistics -m` | - | 显示最近一月变更 | `f statistics -m` |
+| `f statistics -y` | - | 显示最近一年变更 | `f statistics -y` |
 | NPM 命令 |
 | `f nrm` | - | 运行 NRM 包 | `f nrm ls` |
 | `f ncu` | - | 检查包更新 | `f ncu` |

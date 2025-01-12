@@ -180,8 +180,34 @@ const commands: Command[] = [
   {
     command: 'statistics',
     aliases: ['s', 'st', 'stats'],
-    handler: handleStatistics,
-    describe: t('commands.statistics.desc')
+    handler: (argv) => handleStatistics({
+      day: argv.d,
+      week: argv.w,
+      month: argv.m,
+      year: argv.y
+    }),
+    describe: t('commands.statistics.desc'),
+    builder: (yargs) => yargs
+      .option('d', {
+        alias: 'day',
+        type: 'boolean',
+        describe: t('commands.statistics.dayOption')
+      })
+      .option('w', {
+        alias: 'week',
+        type: 'boolean',
+        describe: t('commands.statistics.weekOption')
+      })
+      .option('m', {
+        alias: 'month',
+        type: 'boolean',
+        describe: t('commands.statistics.monthOption')
+      })
+      .option('y', {
+        alias: 'year',
+        type: 'boolean',
+        describe: t('commands.statistics.yearOption')
+      })
   }
 ];
 

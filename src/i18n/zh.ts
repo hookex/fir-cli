@@ -106,11 +106,22 @@ export default {
     statistics: {
       desc: '显示各类型文件的代码统计',
       title: '代码统计',
+      current: '当前项目统计',
+      day: '最近24小时变更',
+      week: '最近一周变更',
+      month: '最近一月变更',
+      year: '最近一年变更',
       header: '文件类型',
       files: '文件数',
       lines: '行数',
+      added: '新增',
+      deleted: '删除',
       percentage: '占比',
-      total: '总计'
+      total: '总计',
+      dayOption: '显示最近24小时的变更',
+      weekOption: '显示最近一周的变更',
+      monthOption: '显示最近一月的变更',
+      yearOption: '显示最近一年的变更'
     }
   },
   common: {

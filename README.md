@@ -97,7 +97,11 @@ Or use environment variables:
 | Other Commands |
 | `f config` | `f c`, `f co` | Configure CLI settings | `f config set openai.apiKey "your-key"` |
 | `f help` | - | Show help information | `f help commit` |
-| `f statistics` | - | Show code statistics by file extension | `f statistics` |
+| `f statistics` | `f s`, `f st`, `f stats` | Show code statistics | `f statistics` |
+| `f statistics -d` | - | Show last 24h changes | `f statistics -d` |
+| `f statistics -w` | - | Show last week changes | `f statistics -w` |
+| `f statistics -m` | - | Show last month changes | `f statistics -m` |
+| `f statistics -y` | - | Show last year changes | `f statistics -y` |
 
 ## Features
 
