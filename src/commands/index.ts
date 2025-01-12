@@ -274,66 +274,38 @@ const commands: Array<any> = [
   }
 ];
 
-export async function registerCommands(version: string) {
+export async function registerCommands(version: string, scriptName: string = 'f') {
   const yargsInstance = yargs(hideBin(process.argv))
-    .scriptName('f')
-    .usage('$0 <command> [options]')
+    .scriptName(scriptName)
+    .usage(`\n$0 <command> [options]`)
     .help()
     .alias('help', 'h')
     .version('version', 'Show version number', version)
     .alias('version', 'v')
     .demandCommand(0)
     .showHelpOnFail(true)
-    .strict();
+    .wrap(null)
+    .strict()
+    .updateStrings({
+      'Commands:': chalk.bold('Commands:'),
+      'Options:': chalk.bold('Options:'),
+      'boolean': chalk.gray('boolean')
+    });
 
   // 注册所有命令
   commands.forEach(cmd => {
-    const { command, describe, handler, builder, aliases = [] } = cmd;
-    yargsInstance.command(command, describe, builder || {}, handler);
+    yargsInstance.command(cmd);
   });
 
-  // 初始化 commandMap
-  commands.forEach(cmd => {
-    const { command, describe, handler, builder, aliases = [] } = cmd;
-    const mainCommand = command.split(' ')[0];
-    commandMap[mainCommand] = { command, describe, handler, builder, aliases };
-  });
-
+  // 检查是否有命令参数
   const args = process.argv.slice(2);
-  if (args.length === 0) {
+  if (args.length === 0 || args[0] === scriptName) {
     yargsInstance.showHelp();
     process.exit(0);
   }
 
-  const input = args[0];
-  const matchingCommands = findMatchingCommands(input);
-  
-  if (matchingCommands.length > 0) {
-    // 如果只有一个匹配的命令，直接执行
-    const selectedCommand = matchingCommands.length === 1 
-      ? matchingCommands[0] 
-      : await handleCommandConflict(input, matchingCommands);
+  // 解析参数
+  await yargsInstance.parse();
 
-    // 执行选中的命令
-    const newArgs = [selectedCommand, ...args.slice(1)];
-    const cmdPath = process.argv[1];
-    const fullCommand = `node ${cmdPath} ${newArgs.join(' ')}`;
-    try {
-      execSync(fullCommand, { stdio: 'inherit' });
-      process.exit(0);
-    } catch (error) {
-      process.exit(1);
-    }
-  }
-
-  return new Promise((resolve, reject) => {
-    yargsInstance.parse(process.argv.slice(2), (err: Error | null, argv: any, output: string) => {
-      if (err) {
-        yargsInstance.showHelp();
-        process.exit(1);
-      } else {
-        resolve(argv);
-      }
-    });
-  });
+  return yargsInstance;
 }

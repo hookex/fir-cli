@@ -32,12 +32,8 @@ function getCurrentVersion() {
   }
 }
 
-// 只在特定命令时显示欢迎信息
-const args = process.argv.slice(2);
-const showLogo = args.length === 0 || args[0] === '--help' || args[0] === '-h';
-const currentVersion = getCurrentVersion();
-
-if (showLogo) {
+// 显示欢迎信息
+function showWelcomeMessage() {
   console.log(
     chalk.cyan(
       figlet.textSync('Fir CLI', {
@@ -48,21 +44,47 @@ if (showLogo) {
     )
   );
   console.log(chalk.yellow('Your command line companion\n'));
+}
 
-  // 显示版本信息
-  getLatestVersion().then(latestVersion => {
+// 检查版本更新
+async function checkVersion() {
+  const currentVersion = getCurrentVersion();
+  const latestVersion = await getLatestVersion();
+  
+  if (latestVersion) {
     console.log(chalk.gray(`Current version: v${currentVersion}`));
-    if (latestVersion && latestVersion !== currentVersion) {
+    if (latestVersion !== currentVersion) {
       console.log(chalk.yellow(`Latest version: v${latestVersion}`));
       console.log(chalk.green('\nRun "npm install -g fir-cli" to update\n'));
     } else {
       console.log(chalk.green('You are using the latest version\n'));
     }
-  });
+  }
+  return currentVersion;
 }
 
-// 注册命令
-registerCommands(currentVersion).catch(error => {
-  console.error('Error:', error);
-  process.exit(1);
-});
+// 主函数
+async function main() {
+  try {
+    const args = process.argv.slice(2);
+    const scriptName = process.argv[1].endsWith('fir') ? 'fir' : 'f';
+    const showWelcome = args.length === 0 || args[0] === '--help' || args[0] === '-h';
+    
+    // 只在没有具体命令时显示欢迎信息和版本信息
+    let currentVersion;
+    if (showWelcome) {
+      showWelcomeMessage();
+      currentVersion = await checkVersion();
+    } else {
+      currentVersion = getCurrentVersion();
+    }
+    
+    // 注册命令并解析参数
+    await registerCommands(currentVersion, scriptName);
+  } catch (error: any) {
+    console.error(chalk.red('Error:'), error.message);
+    process.exit(1);
+  }
+}
+
+main();
