@@ -89,7 +89,8 @@ export async function chat(question: string): Promise<string> {
       model: config.ai.model,
       messages: history.messages,
       temperature: 0.7,
-      max_tokens: 1000
+      max_tokens: 1000,
+      stream: false
     }, {
       headers: {
         'Authorization': `Bearer ${config.ai.apiKey}`,
