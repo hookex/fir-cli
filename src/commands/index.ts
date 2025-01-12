@@ -10,6 +10,7 @@ import { handlePing } from './ping.js';
 import { handleAI } from './ai.js';
 import { handleTranslate } from './translate.js';
 import { handleConfig } from './config.js';
+import { handleDebug } from './debug.js';
 import chalk from 'chalk';
 
 interface CommitArgs {
@@ -227,6 +228,12 @@ const commands: Array<any> = [
         console.error("Error:", error.message);
       }
     }
+  },
+  {
+    command: 'debug',
+    aliases: ['d'],
+    describe: 'Analyze last command execution',
+    handler: handleDebug
   }
 ];
 
@@ -371,6 +378,12 @@ export function registerCommands() {
           console.error("Error:", error.message);
         }
       }
+    })
+    .command({
+      command: 'debug',
+      aliases: ['d'],
+      describe: 'Analyze last command execution',
+      handler: handleDebug
     })
     .command({
       command: '*',
