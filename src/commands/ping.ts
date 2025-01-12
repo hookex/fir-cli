@@ -10,8 +10,8 @@ const TOP_10_DOMAINS = [
   'google.com',
   'github.com',
   'bytedance.net',
-  'bytedance.net',
-  'registry.npmjs.org',
+  'aliyun.com',
+  'registry.npmjs.org'
 ];
 
 interface PingResult {
